@@ -34,16 +34,13 @@ func NewTalkerDiscord(token string) (impl *TalkerDiscord, shutdown func()) {
 	dg.AddHandler(messageCreate(t))
 
 	// Register the ReactionGet all
-	// dg.AddHandler(messageReactionsGet(t))
+ 	dg.AddHandler(messageReactionAdd(t))
 
-	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
-		fmt.Printf("Add %#v\n", m.MessageReaction.Emoji)
-	})
 	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageReactionRemove) {
-		fmt.Printf("%#v\n", m.MessageReaction.Emoji)
+		fmt.Printf("Remove %#v\n", m.MessageReaction)
 	})
 	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageReactionRemoveAll) {
-		fmt.Printf("%#v\n", m.MessageReaction.Emoji)
+		fmt.Printf("Remove all %#v\n", m.MessageReaction.Emoji)
 	})
 
 	// In this example, we only care about receiving message events.
@@ -93,11 +90,10 @@ func messageCreate(t *TalkerDiscord) func(s *discordgo.Session, m *discordgo.Mes
 
 }
 
-func messageReactionsGet(t *TalkerDiscord) func(s *discordgo.Session, m *discordgo.MessageReactions) {
-	return func(s *discordgo.Session, m *discordgo.MessageReactions) {
-		fmt.Printf("%#v", m)
+func messageReactionAdd(t *TalkerDiscord) func(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+	return func(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+		fmt.Printf("Add %#v\n", m.MessageReaction)
 	}
-
 }
 
 func (t TalkerDiscord) Read() chan Message {
