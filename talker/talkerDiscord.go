@@ -1,6 +1,8 @@
 package talker
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -31,8 +33,21 @@ func NewTalkerDiscord(token string) (impl *TalkerDiscord, shutdown func()) {
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(messageCreate(t))
 
+	// Register the ReactionGet all
+	// dg.AddHandler(messageReactionsGet(t))
+
+	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+		fmt.Printf("Add %#v\n", m.MessageReaction.Emoji)
+	})
+	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageReactionRemove) {
+		fmt.Printf("%#v\n", m.MessageReaction.Emoji)
+	})
+	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageReactionRemoveAll) {
+		fmt.Printf("%#v\n", m.MessageReaction.Emoji)
+	})
+
 	// In this example, we only care about receiving message events.
-	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildMessages)
+	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildMessages | discordgo.IntentsGuildMessageReactions)
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
@@ -54,10 +69,16 @@ func messageCreate(t *TalkerDiscord) func(s *discordgo.Session, m *discordgo.Mes
 		}
 
 		write := func(content string) {
-			_, err := s.ChannelMessageSend(m.ChannelID, content)
+			message, err := s.ChannelMessageSend(m.ChannelID, content)
 
 			if err != nil {
 				panic(err.Error())
+			}
+
+			err = s.MessageReactionAdd(m.ChannelID, message.ID, "🧪")
+
+			if err != nil {
+				fmt.Println(err.Error())
 			}
 		}
 
@@ -68,6 +89,13 @@ func messageCreate(t *TalkerDiscord) func(s *discordgo.Session, m *discordgo.Mes
 		}
 
 		t.messageCh <- mess
+	}
+
+}
+
+func messageReactionsGet(t *TalkerDiscord) func(s *discordgo.Session, m *discordgo.MessageReactions) {
+	return func(s *discordgo.Session, m *discordgo.MessageReactions) {
+		fmt.Printf("%#v", m)
 	}
 
 }
