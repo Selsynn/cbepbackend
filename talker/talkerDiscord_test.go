@@ -35,6 +35,11 @@ func testNewServer() Server {
 	return s
 }
 
+func Shup() {
+	testNew()
+	testNewServer()
+}
+
 func TestWriteFormat(tester *testing.T) {
 	key := os.Getenv("DiscordBotToken")
 
