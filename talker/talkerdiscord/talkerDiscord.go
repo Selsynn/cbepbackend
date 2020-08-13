@@ -1,14 +1,15 @@
-package talker
+package talkerdiscord
 
 import (
 	"fmt"
 
+	"github.com/Selsynn/DiscordBotTest1/talker"
 	"github.com/bwmarrin/discordgo"
 )
 
 type TalkerDiscord struct {
 	session   *discordgo.Session
-	messageCh chan Message
+	messageCh chan talker.Message
 	Servers   []*ServerDiscord
 }
 
@@ -26,7 +27,7 @@ func NewTalkerDiscord(token string) (impl *TalkerDiscord, shutdown func()) {
 
 	t := &TalkerDiscord{
 		session:   dg,
-		messageCh: make(chan Message, 1),
+		messageCh: make(chan talker.Message, 1),
 		Servers:   make([]*ServerDiscord, 0),
 	}
 
@@ -34,7 +35,7 @@ func NewTalkerDiscord(token string) (impl *TalkerDiscord, shutdown func()) {
 	dg.AddHandler(messageCreate(t))
 
 	// Register the ReactionGet all
- 	dg.AddHandler(messageReactionAdd(t))
+	dg.AddHandler(messageReactionAdd(t))
 
 	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageReactionRemove) {
 		fmt.Printf("Remove %#v\n", m.MessageReaction)
@@ -79,7 +80,7 @@ func messageCreate(t *TalkerDiscord) func(s *discordgo.Session, m *discordgo.Mes
 			}
 		}
 
-		mess := Message{
+		mess := talker.Message{
 			Write:   write,
 			Content: m.Content,
 			Server:  t.FindOrCreateServer(m.ChannelID),
@@ -96,11 +97,11 @@ func messageReactionAdd(t *TalkerDiscord) func(s *discordgo.Session, m *discordg
 	}
 }
 
-func (t TalkerDiscord) Read() chan Message {
+func (t TalkerDiscord) Read() chan talker.Message {
 	return t.messageCh
 }
 
-func (t TalkerDiscord) Write(o Order) {
+func (t TalkerDiscord) Write(o talker.Order) {
 	o.Write(o.Content)
 }
 

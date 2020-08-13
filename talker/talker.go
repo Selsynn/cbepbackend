@@ -3,7 +3,6 @@ package talker
 type Talker interface {
 	Read() chan Message
 	Write(o Order)
-	//GetServers() []Server
 }
 
 type Message struct {
@@ -21,3 +20,4 @@ type Server interface {
 	GetName() string
 	GetId() string
 }
+

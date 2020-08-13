@@ -1,10 +1,11 @@
-package talker
+package talkerdiscord
 
 import (
 	"os"
 	"testing"
 	"time"
 
+	"github.com/Selsynn/DiscordBotTest1/talker"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -22,12 +23,12 @@ import (
 // 	fmt.Print("result", result)
 // }
 
-func testNew() Talker {
+func testNew() talker.Talker {
 	t, _ := NewTalkerDiscord("")
 	return t
 }
 
-func testNewServer() Server {
+func testNewServer() talker.Server {
 	s := ServerDiscord{
 		channelId: "",
 		name:      "Name",
@@ -69,7 +70,7 @@ func TestWriteFormat(tester *testing.T) {
 			URL:    "https://www.linuxmint.com/img/ads/info.png",
 		},
 	}
-	o := Order{
+	o := talker.Order{
 		Content: "Chocolat",
 		Write: func(content string) {
 			_, err := t.session.ChannelMessageSendEmbed("735167412869005313", e)

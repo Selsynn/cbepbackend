@@ -2,40 +2,29 @@ package town
 
 import (
 	"fmt"
-)
-
-type Profession string
-
-const (
-	Merchant Profession = "Merchant"
-	Crafter  Profession = "Crafter"
+	"time"
 )
 
 type Town struct {
 	Name              string
 	Villagers         int
 	Threat            int
-	LastThreatChecked int //timestamp
+	LastThreatChecked time.Time
 	Nature            int
-	Crafters          []NPC
-	Merchants         []NPC
-	Consummable       []Item
-	Items             []Item
-	Resources         []Item
-	Upgrades          []Upgrade
-	Adventurers       []Adventurer
+	Crafters          []*NPC
+	Merchants         []*NPC
+	Consummable       []*Item
+	Items             []*Item
+	Resources         []*Item
+	Upgrades          []*Upgrade
+	Adventurers       []*Adventurer
 }
 
 type (
-	NPCName string
-	NPC     struct {
-		Name      NPCName
-		Specialty Profession
-		RelQuest  map[int]Quest
-	}
 	Adventurer struct {
 		Name          string
 		Relationships map[*NPC]int
+		ID            string
 	}
 
 	ItemName string
@@ -47,21 +36,28 @@ type (
 	Upgrade     struct {
 		Name UpgradeName
 	}
-
-	Quest struct {
-	}
 )
 
 func New() *Town {
 	t := &Town{
-		Crafters:    []NPC{},
-		Merchants:   []NPC{},
-		Consummable: []Item{},
-		Items:       []Item{},
-		Resources:   []Item{},
-		Upgrades:    []Upgrade{},
-		Adventurers: []Adventurer{},
+		Crafters:          []*NPC{},
+		Merchants:         []*NPC{},
+		Consummable:       []*Item{},
+		Items:             []*Item{},
+		Resources:         []*Item{},
+		Upgrades:          []*Upgrade{},
+		Adventurers:       []*Adventurer{},
+		Name:              "IdleTown",
+		LastThreatChecked: time.Now(),
+		Nature:            0,
+		Threat:            0,
+		Villagers:         3,
 	}
+
+	t.CreateMerchant()
+	t.CreateCrafter()
+	t.CreateAdventurer()
+
 	return t
 }
 
@@ -76,11 +72,46 @@ func (t Town) DescribeHeros() string {
 }
 
 func (t *Town) CreateMerchant() {
-	t.Merchants = append(t.Merchants, NPC{
+	t.Merchants = append(t.Merchants, &NPC{
 		Name:      "Super Generic Merchant",
 		RelQuest:  make(map[int]Quest),
 		Specialty: Merchant,
 	})
 
 	fmt.Printf("Create MERCHANT \n%#v\n", t.Merchants)
+}
+
+func (t *Town) CreateCrafter() {
+	t.Crafters = append(t.Crafters, &NPC{
+		Name:      "Super Generic Crafter",
+		RelQuest:  make(map[int]Quest),
+		Specialty: Crafter,
+	})
+
+	fmt.Printf("Create Crafter \n%#v\n", t.Crafters)
+}
+
+func (t *Town) CreateAdventurer() {
+	t.Adventurers = append(t.Adventurers, &Adventurer{
+		Name:          "SuperAdventurer",
+		ID:            "SomeSecretId",
+		Relationships: make(map[*NPC]int),
+	})
+
+	fmt.Printf("Create Adventurer \n%#v\n", t.Adventurers)
+}
+
+func (t *Town) Craft(c *NPC, i *Item, a *Adventurer) {
+	fmt.Printf("You asked for crafting %#v by crafter %s \n", i, c.Name)
+	c.AddWork(i, 10, a)
+}
+
+func (t *Town) GetItem(name string) *Item {
+	switch name {
+	case "BOW":
+		return &Item{
+			Name: "Bow",
+		}
+	}
+	return nil
 }

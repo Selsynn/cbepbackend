@@ -1,0 +1,954 @@
+{
+    "inkVersion": 19,
+    "root": [
+        [
+            "^Bonjour, vous voilà arrivé dans un univers parallèle.",
+            "\n",
+            "^Chaque nuit, l'état du monde changera.",
+            "\n",
+            "^Chaque jour, vous pourrez faire seulement quelques actions.",
+            "\n",
+            "^Tentez de résoudre le mystère qui entoure le Monde d'Yrdalia.",
+            "\n",
+            [
+                "ev",
+                {
+                    "^->": "0.8.$r1"
+                },
+                {
+                    "temp=": "$r"
+                },
+                "str",
+                {
+                    "->": ".^.s"
+                },
+                [
+                    {
+                        "#n": "$r1"
+                    }
+                ],
+                "/str",
+                "/ev",
+                {
+                    "*": "0.c-0",
+                    "flg": 18
+                },
+                {
+                    "s": [
+                        "^Commencer l'aventure ",
+                        {
+                            "->": "$r",
+                            "var": true
+                        },
+                        null
+                    ]
+                }
+            ],
+            {
+                "c-0": [
+                    "ev",
+                    {
+                        "^->": "0.c-0.$r2"
+                    },
+                    "/ev",
+                    {
+                        "temp=": "$r"
+                    },
+                    {
+                        "->": "0.8.s"
+                    },
+                    [
+                        {
+                            "#n": "$r2"
+                        }
+                    ],
+                    {
+                        "->": "Night"
+                    },
+                    "\n",
+                    {
+                        "->": "0.g-0"
+                    },
+                    {
+                        "#f": 5
+                    }
+                ],
+                "g-0": [
+                    "done",
+                    {
+                        "#f": 5
+                    }
+                ]
+            }
+        ],
+        "done",
+        {
+            "Night": [
+                "^Vous vous réveillez avec un mal de crâne assez impressionnant. Vous avez vécu ",
+                "ev",
+                {
+                    "VAR?": "nbDay"
+                },
+                "out",
+                "/ev",
+                "\n",
+                "^Quand vous regardez autoure de vous, vous ne reconnaissez rien.",
+                "\n",
+                "ev",
+                {
+                    "VAR?": "nbDay"
+                },
+                1,
+                "+",
+                {
+                    "VAR=": "nbDay",
+                    "re": true
+                },
+                "/ev",
+                {
+                    "->": "Day"
+                },
+                {
+                    "#f": 1
+                }
+            ],
+            "Day": [
+                "ev",
+                5,
+                "/ev",
+                {
+                    "VAR=": "nbAction",
+                    "re": true
+                },
+                {
+                    "->": ".^.Loop"
+                },
+                {
+                    "Loop": [
+                        [
+                            [
+                                "ev",
+                                {
+                                    "^->": "Day.Loop.0.0.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-0",
+                                    "flg": 2
+                                },
+                                {
+                                    "s": [
+                                        "^Aventure ",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            [
+                                "ev",
+                                {
+                                    "^->": "Day.Loop.0.1.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-1",
+                                    "flg": 2
+                                },
+                                {
+                                    "s": [
+                                        "^Commerce ",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            [
+                                "ev",
+                                {
+                                    "^->": "Day.Loop.0.2.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-2",
+                                    "flg": 2
+                                },
+                                {
+                                    "s": [
+                                        "^Religion ",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            [
+                                "ev",
+                                {
+                                    "^->": "Day.Loop.0.3.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-3",
+                                    "flg": 2
+                                },
+                                {
+                                    "s": [
+                                        "^Se reposer et laisser la nuit venir ",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            {
+                                "c-0": [
+                                    "ev",
+                                    {
+                                        "^->": "Day.Loop.0.c-0.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.0.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    {
+                                        "->": "Wood"
+                                    },
+                                    "\n",
+                                    {
+                                        "#f": 5
+                                    }
+                                ],
+                                "c-1": [
+                                    "ev",
+                                    {
+                                        "^->": "Day.Loop.0.c-1.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.1.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    {
+                                        "->": "Market"
+                                    },
+                                    "\n",
+                                    {
+                                        "#f": 5
+                                    }
+                                ],
+                                "c-2": [
+                                    "ev",
+                                    {
+                                        "^->": "Day.Loop.0.c-2.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.2.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    {
+                                        "->": "Church"
+                                    },
+                                    "\n",
+                                    {
+                                        "#f": 5
+                                    }
+                                ],
+                                "c-3": [
+                                    "ev",
+                                    {
+                                        "^->": "Day.Loop.0.c-3.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.3.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    {
+                                        "->": "Night"
+                                    },
+                                    "\n",
+                                    {
+                                        "#f": 5
+                                    }
+                                ]
+                            }
+                        ],
+                        {
+                            "#f": 1
+                        }
+                    ],
+                    "#f": 1
+                }
+            ],
+            "Market": [
+                {
+                    "#f": 1
+                }
+            ],
+            "Church": [
+                {
+                    "#f": 1
+                }
+            ],
+            "Wood": [
+                "^Vous allez parler avec les aventuriers.",
+                "\n",
+                "ev",
+                {
+                    "VAR?": "favRanger"
+                },
+                1,
+                "+",
+                {
+                    "VAR=": "favRanger",
+                    "re": true
+                },
+                "/ev",
+                {
+                    "->": ".^.Loop"
+                },
+                {
+                    "Loop": [
+                        [
+                            [
+                                "ev",
+                                {
+                                    "^->": "Wood.Loop.0.0.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                {
+                                    "VAR?": "mysteryRanger"
+                                },
+                                {
+                                    "list": {}
+                                },
+                                "==",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-0",
+                                    "flg": 19
+                                },
+                                {
+                                    "s": [
+                                        "^Saluer tout le monde. ",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            [
+                                "ev",
+                                {
+                                    "^->": "Wood.Loop.0.1.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-1",
+                                    "flg": 2
+                                },
+                                {
+                                    "s": [
+                                        "^Rentrer au village ",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            {
+                                "c-0": [
+                                    "ev",
+                                    {
+                                        "^->": "Wood.Loop.0.c-0.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.0.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    "\n",
+                                    "^Vous ne connaissez personne du coup quoi de plus normal?",
+                                    "\n",
+                                    "ev",
+                                    {
+                                        "VAR?": "mysteryRanger"
+                                    },
+                                    {
+                                        "VAR?": "FIRST_CONTACT"
+                                    },
+                                    "+",
+                                    {
+                                        "VAR=": "mysteryRanger",
+                                        "re": true
+                                    },
+                                    "/ev",
+                                    "^Après avoir parlé pendant ce qui vous parait des heures, il est temps de revenir au centre du village.",
+                                    "\n",
+                                    "ev",
+                                    {
+                                        "VAR?": "nbAction"
+                                    },
+                                    5,
+                                    "-",
+                                    {
+                                        "VAR=": "nbAction",
+                                        "re": true
+                                    },
+                                    "/ev",
+                                    {
+                                        "->": ".^.^.^"
+                                    },
+                                    "ev",
+                                    {
+                                        "VAR?": "woodState"
+                                    },
+                                    "/ev",
+                                    [
+                                        "du",
+                                        "ev",
+                                        {
+                                            "VAR?": "FINE"
+                                        },
+                                        "==",
+                                        "/ev",
+                                        {
+                                            "->": ".^.b",
+                                            "c": true
+                                        },
+                                        {
+                                            "b": [
+                                                "pop",
+                                                "\n",
+                                                "thread",
+                                                {
+                                                    "->": "Wood.FineWood"
+                                                },
+                                                {
+                                                    "->": ".^.^.^.30"
+                                                },
+                                                null
+                                            ]
+                                        }
+                                    ],
+                                    [
+                                        "du",
+                                        "ev",
+                                        {
+                                            "VAR?": "NORMAL"
+                                        },
+                                        "==",
+                                        "/ev",
+                                        {
+                                            "->": ".^.b",
+                                            "c": true
+                                        },
+                                        {
+                                            "b": [
+                                                "pop",
+                                                "\n",
+                                                "thread",
+                                                {
+                                                    "->": "Wood.NormalWood"
+                                                },
+                                                {
+                                                    "->": ".^.^.^.30"
+                                                },
+                                                null
+                                            ]
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            "->": ".^.b"
+                                        },
+                                        {
+                                            "b": [
+                                                "pop",
+                                                "\n",
+                                                "thread",
+                                                {
+                                                    "->": "Wood.DangerousWood"
+                                                },
+                                                {
+                                                    "->": ".^.^.^.30"
+                                                },
+                                                null
+                                            ]
+                                        }
+                                    ],
+                                    "nop",
+                                    "\n",
+                                    {
+                                        "#f": 5
+                                    }
+                                ],
+                                "c-1": [
+                                    "ev",
+                                    {
+                                        "^->": "Wood.Loop.0.c-1.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.1.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    {
+                                        "->": "Day.Loop"
+                                    },
+                                    "\n",
+                                    {
+                                        "#f": 5
+                                    }
+                                ]
+                            }
+                        ],
+                        {
+                            "#f": 1
+                        }
+                    ],
+                    "FineWood": [
+                        [
+                            [
+                                "ev",
+                                {
+                                    "^->": "Wood.FineWood.0.0.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-0",
+                                    "flg": 2
+                                },
+                                {
+                                    "s": [
+                                        "^Une petite promenade de santé dans les bois autour du village?",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            {
+                                "c-0": [
+                                    "ev",
+                                    {
+                                        "^->": "Wood.FineWood.0.c-0.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.0.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    "\n",
+                                    "ev",
+                                    {
+                                        "VAR?": "nbAction"
+                                    },
+                                    3,
+                                    "-",
+                                    {
+                                        "VAR=": "nbAction",
+                                        "re": true
+                                    },
+                                    "/ev",
+                                    "ev",
+                                    {
+                                        "VAR?": "favRanger"
+                                    },
+                                    1,
+                                    "+",
+                                    {
+                                        "VAR=": "favRanger",
+                                        "re": true
+                                    },
+                                    "/ev",
+                                    {
+                                        "->": "Wood.Loop"
+                                    },
+                                    {
+                                        "#f": 5
+                                    }
+                                ]
+                            }
+                        ],
+                        {
+                            "#f": 1
+                        }
+                    ],
+                    "NormalWood": [
+                        [
+                            [
+                                "ev",
+                                {
+                                    "^->": "Wood.NormalWood.0.0.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-0",
+                                    "flg": 2
+                                },
+                                {
+                                    "s": [
+                                        "^Une promenade avec un petit groupe pour vous accompagner",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            {
+                                "c-0": [
+                                    "ev",
+                                    {
+                                        "^->": "Wood.NormalWood.0.c-0.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.0.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    "\n",
+                                    "ev",
+                                    {
+                                        "VAR?": "nbAction"
+                                    },
+                                    5,
+                                    "-",
+                                    {
+                                        "VAR=": "nbAction",
+                                        "re": true
+                                    },
+                                    "/ev",
+                                    "ev",
+                                    {
+                                        "VAR?": "favRanger"
+                                    },
+                                    2,
+                                    "+",
+                                    {
+                                        "VAR=": "favRanger",
+                                        "re": true
+                                    },
+                                    "/ev",
+                                    {
+                                        "->": "Wood.Loop"
+                                    },
+                                    {
+                                        "#f": 5
+                                    }
+                                ]
+                            }
+                        ],
+                        {
+                            "#f": 1
+                        }
+                    ],
+                    "DangerousWood": [
+                        [
+                            [
+                                "ev",
+                                {
+                                    "^->": "Wood.DangerousWood.0.0.$r1"
+                                },
+                                {
+                                    "temp=": "$r"
+                                },
+                                "str",
+                                {
+                                    "->": ".^.s"
+                                },
+                                [
+                                    {
+                                        "#n": "$r1"
+                                    }
+                                ],
+                                "/str",
+                                "/ev",
+                                {
+                                    "*": ".^.^.c-0",
+                                    "flg": 2
+                                },
+                                {
+                                    "s": [
+                                        "^Une balade dangereuse",
+                                        {
+                                            "->": "$r",
+                                            "var": true
+                                        },
+                                        null
+                                    ]
+                                }
+                            ],
+                            {
+                                "c-0": [
+                                    "ev",
+                                    {
+                                        "^->": "Wood.DangerousWood.0.c-0.$r2"
+                                    },
+                                    "/ev",
+                                    {
+                                        "temp=": "$r"
+                                    },
+                                    {
+                                        "->": ".^.^.0.s"
+                                    },
+                                    [
+                                        {
+                                            "#n": "$r2"
+                                        }
+                                    ],
+                                    "\n",
+                                    "^C'est trop dangereux pour vous. Après trois pas vous rentrez en tremblotant.",
+                                    "\n",
+                                    {
+                                        "->": "Wood.Loop"
+                                    },
+                                    {
+                                        "#f": 5
+                                    }
+                                ]
+                            }
+                        ],
+                        {
+                            "#f": 1
+                        }
+                    ],
+                    "#f": 1
+                }
+            ],
+            "global decl": [
+                "ev",
+                0,
+                {
+                    "VAR=": "nbDay"
+                },
+                0,
+                {
+                    "VAR=": "nbAction"
+                },
+                {
+                    "list": {},
+                    "origins": [
+                        "elementState"
+                    ]
+                },
+                {
+                    "VAR=": "elementState"
+                },
+                {
+                    "VAR?": "FINE"
+                },
+                {
+                    "VAR=": "woodState"
+                },
+                0,
+                {
+                    "VAR=": "favRanger"
+                },
+                {
+                    "list": {},
+                    "origins": [
+                        "mysteryRanger"
+                    ]
+                },
+                {
+                    "VAR=": "mysteryRanger"
+                },
+                "/ev",
+                "end",
+                null
+            ],
+            "#f": 1
+        }
+    ],
+    "listDefs": {
+        "elementState": {
+            "FINE": 1,
+            "NORMAL": 2,
+            "DANGEROUS": 3,
+            "TERRIBLE": 4
+        },
+        "mysteryRanger": {
+            "FIRST_CONTACT": 1
+        }
+    }
+}
