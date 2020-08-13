@@ -33,10 +33,12 @@ func main() {
 
 	switch BotImplementation {
 	case "discord":
+		fmt.Printf("BotImplementation chosen: Discord\n")
 		var shutdownTalker func()
 		t, shutdownTalker = talkerdiscord.NewTalkerDiscord(Token)
 		defer shutdownTalker()
 	case "cmd":
+		fmt.Printf("BotImplementation chosen: Cmd\n")
 		t = talkercmd.New()
 	default:
 		panic("verify parameters")

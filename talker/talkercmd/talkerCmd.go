@@ -35,7 +35,7 @@ func New() *TalkerCmd {
 
 func (t TalkerCmd) autoAnswerToManager() {
 	for sent := range t.discussionSentToManagerCh {
-		time.Sleep(time.Second)
+		time.Sleep(time.Second) //FIXME use mutex instead
 		fmt.Printf("TalkerCmd - Reading <<%s>> \n", sent)
 		t.messagesCh <- talker.Message{
 			Content: sent,
