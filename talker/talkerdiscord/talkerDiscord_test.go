@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Selsynn/craft-build-explore-protect-backend/talker"
+	"github.com/Selsynn/cbepbackend/talker"
 	"github.com/bwmarrin/discordgo"
 )
 

@@ -7,13 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Selsynn/craft-build-explore-protect-backend/discord"
-	"github.com/Selsynn/craft-build-explore-protect-backend/interaction"
-	"github.com/Selsynn/craft-build-explore-protect-backend/interaction/interactiondiscordimpl"
-	"github.com/Selsynn/craft-build-explore-protect-backend/manager"
-	"github.com/Selsynn/craft-build-explore-protect-backend/talker"
-	"github.com/Selsynn/craft-build-explore-protect-backend/talker/talkercmd"
-	"github.com/Selsynn/craft-build-explore-protect-backend/talker/talkerdiscord"
+	"github.com/Selsynn/cbepbackend/discord"
+	"github.com/Selsynn/cbepbackend/interaction"
+	"github.com/Selsynn/cbepbackend/interaction/interactiondiscordimpl"
+	"github.com/Selsynn/cbepbackend/manager"
+	"github.com/Selsynn/cbepbackend/talker"
+	"github.com/Selsynn/cbepbackend/talker/talkercmd"
+	"github.com/Selsynn/cbepbackend/talker/talkerdiscord"
 )
 
 // Variables used for command line parameters

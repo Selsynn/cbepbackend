@@ -3,10 +3,10 @@ package manager
 import (
 	"fmt"
 
-	"github.com/Selsynn/craft-build-explore-protect-backend/business/command"
-	businessTown "github.com/Selsynn/craft-build-explore-protect-backend/business/town"
-	"github.com/Selsynn/craft-build-explore-protect-backend/communication"
-	"github.com/Selsynn/craft-build-explore-protect-backend/town"
+	"github.com/Selsynn/cbepbackend/business/command"
+	businessTown "github.com/Selsynn/cbepbackend/business/town"
+	"github.com/Selsynn/cbepbackend/communication"
+	"github.com/Selsynn/cbepbackend/town"
 )
 
 type Manager struct {

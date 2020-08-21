@@ -1,4 +1,4 @@
-module github.com/Selsynn/craft-build-explore-protect-backend
+module github.com/Selsynn/cbepbackend
 
 go 1.13
 

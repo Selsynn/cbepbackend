@@ -3,10 +3,10 @@ package talkerdiscord
 import (
 	"fmt"
 
-	"github.com/Selsynn/craft-build-explore-protect-backend/business/user"
-	"github.com/Selsynn/craft-build-explore-protect-backend/discord"
-	"github.com/Selsynn/craft-build-explore-protect-backend/discord/discordreaction"
-	"github.com/Selsynn/craft-build-explore-protect-backend/talker"
+	"github.com/Selsynn/cbepbackend/business/user"
+	"github.com/Selsynn/cbepbackend/discord"
+	"github.com/Selsynn/cbepbackend/discord/discordreaction"
+	"github.com/Selsynn/cbepbackend/talker"
 	"github.com/bwmarrin/discordgo"
 )
 

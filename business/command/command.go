@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Selsynn/craft-build-explore-protect-backend/business/item"
+	"github.com/Selsynn/cbepbackend/business/item"
 )
 
 type ID string
