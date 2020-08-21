@@ -1,9 +1,9 @@
 package communication
 
 import (
-	"github.com/Selsynn/craft-build-explore-protect-backend /business/command"
-	"github.com/Selsynn/craft-build-explore-protect-backend /business/player"
-	"github.com/Selsynn/craft-build-explore-protect-backend /business/town"
+	"github.com/Selsynn/craft-build-explore-protect-backend/business/command"
+	"github.com/Selsynn/craft-build-explore-protect-backend/business/player"
+	"github.com/Selsynn/craft-build-explore-protect-backend/business/town"
 )
 
 type ActionFromManager struct {
@@ -16,6 +16,6 @@ type ActionFromManager struct {
 }
 
 type ContentMessage struct {
-	Text       string
+	Text string
 	//AllActions []*ActionFromManager
 }

@@ -3,14 +3,14 @@ package interactiondiscordimpl
 import (
 	"fmt"
 
-	"github.com/Selsynn/craft-build-explore-protect-backend /business/command"
-	"github.com/Selsynn/craft-build-explore-protect-backend /business/player"
-	"github.com/Selsynn/craft-build-explore-protect-backend /business/town"
-	"github.com/Selsynn/craft-build-explore-protect-backend /business/user"
-	"github.com/Selsynn/craft-build-explore-protect-backend /communication"
-	"github.com/Selsynn/craft-build-explore-protect-backend /discord"
-	"github.com/Selsynn/craft-build-explore-protect-backend /discord/discordreaction"
-	"github.com/Selsynn/craft-build-explore-protect-backend /talker"
+	"github.com/Selsynn/craft-build-explore-protect-backend/business/command"
+	"github.com/Selsynn/craft-build-explore-protect-backend/business/player"
+	"github.com/Selsynn/craft-build-explore-protect-backend/business/town"
+	"github.com/Selsynn/craft-build-explore-protect-backend/business/user"
+	"github.com/Selsynn/craft-build-explore-protect-backend/communication"
+	"github.com/Selsynn/craft-build-explore-protect-backend/discord"
+	"github.com/Selsynn/craft-build-explore-protect-backend/discord/discordreaction"
+	"github.com/Selsynn/craft-build-explore-protect-backend/talker"
 	"github.com/bwmarrin/discordgo"
 )
 

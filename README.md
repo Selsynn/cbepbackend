@@ -5,7 +5,7 @@ To execute the bot (For discord):\
 3- Set the environment variable\
 ```export DiscordBotToken="[REDACTED]"```\
 4- Launch the executable\
-```./craft-build-explore-protect-backend  -t=$DiscordBotToken```\
+```./craft-build-explore-protect-backend -t=$DiscordBotToken```\
 
 Note: Integration test that need the discord bot key will use the environement key
 

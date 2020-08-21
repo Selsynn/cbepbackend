@@ -1,8 +1,8 @@
 package interaction
 
 import (
-	"github.com/Selsynn/craft-build-explore-protect-backend /communication"
-	"github.com/Selsynn/craft-build-explore-protect-backend /talker"
+	"github.com/Selsynn/craft-build-explore-protect-backend/communication"
+	"github.com/Selsynn/craft-build-explore-protect-backend/talker"
 )
 
 type Interaction interface {

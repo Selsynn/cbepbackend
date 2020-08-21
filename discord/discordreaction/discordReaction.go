@@ -1,6 +1,6 @@
 package discordreaction
 
-import "github.com/Selsynn/craft-build-explore-protect-backend /business/command"
+import "github.com/Selsynn/craft-build-explore-protect-backend/business/command"
 
 type ID string
 
