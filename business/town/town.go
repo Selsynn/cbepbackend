@@ -3,9 +3,16 @@ package town
 import (
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/Selsynn/DiscordBotTest1/business/item"
 )
 
+type ID string
+
 type Town struct {
+	ID                ID
 	Name              string
 	Villagers         int
 	Threat            int
@@ -27,9 +34,8 @@ type (
 		ID            string
 	}
 
-	ItemName string
-	Item     struct {
-		Name ItemName
+	Item struct {
+		Name item.ID
 	}
 
 	UpgradeName string
@@ -52,6 +58,7 @@ func New() *Town {
 		Nature:            0,
 		Threat:            0,
 		Villagers:         3,
+		ID:                ID(uuid.New().String()),
 	}
 
 	t.CreateMerchant()
@@ -106,11 +113,11 @@ func (t *Town) Craft(c *NPC, i *Item, a *Adventurer) {
 	c.AddWork(i, 10, a)
 }
 
-func (t *Town) GetItem(name string) *Item {
+func (t *Town) GetItem(name item.ID) *Item {
 	switch name {
-	case "BOW":
+	case item.Bow:
 		return &Item{
-			Name: "Bow",
+			Name: item.Bow,
 		}
 	}
 	return nil

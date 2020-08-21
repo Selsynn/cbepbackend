@@ -7,6 +7,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Selsynn/DiscordBotTest1/discord"
+	"github.com/Selsynn/DiscordBotTest1/interaction"
+	"github.com/Selsynn/DiscordBotTest1/interaction/interactiondiscordimpl"
 	"github.com/Selsynn/DiscordBotTest1/manager"
 	"github.com/Selsynn/DiscordBotTest1/talker"
 	"github.com/Selsynn/DiscordBotTest1/talker/talkercmd"
@@ -30,12 +33,16 @@ func main() {
 	initMain()
 
 	var t talker.Talker
+	var i interaction.Interaction
 
 	switch BotImplementation {
 	case "discord":
 		fmt.Printf("BotImplementation chosen: Discord\n")
 		var shutdownTalker func()
 		t, shutdownTalker = talkerdiscord.NewTalkerDiscord(Token)
+		i = &interactiondiscordimpl.InteractionDiscord{
+			Servers: make(map[discord.ServerID]discord.Server),
+		}
 		defer shutdownTalker()
 	case "cmd":
 		fmt.Printf("BotImplementation chosen: Cmd\n")
@@ -47,9 +54,11 @@ func main() {
 	m := manager.NewManager()
 	go func() {
 		for mess := range t.Read() {
-			order := m.Process(mess)
-			order.Write(order.Content)
+			t.Write(i.GetActionFromManager(m.Process(i.GetActionToManager(mess))))
 		}
+		// 	order := m.Process(mess)
+		// 	order.Write(order.Content)
+		// }
 	}()
 
 	// Wait here until CTRL-C or other term signal is received.

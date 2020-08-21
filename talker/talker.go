@@ -1,23 +1,24 @@
 package talker
 
 type Talker interface {
-	Read() chan Message
-	Write(o Order)
+	Read() chan MessageReceived
+	Write(MessageSent)
 }
 
-type Message struct {
-	Content string
-	Write   func(string)
-	Server  Server
-}
+// type Message struct {
+// 	Content string
+// 	Write   func(string)
+// 	Server  Server
+// }
 
-type Order struct {
-	Write   func(string)
-	Content string
-}
+// type Order struct {
+// 	Write   func(string)
+// 	Content string
+// }
 
-type Server interface {
-	GetName() string
-	GetId() string
+type MessageReceived interface {
+	ThisStructIsAMessageReceive()
 }
-
+type MessageSent interface {
+	ThisStructIsAMessageSent()
+}

@@ -2,29 +2,25 @@ package manager
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/Selsynn/DiscordBotTest1/talker"
+	"github.com/Selsynn/DiscordBotTest1/business/command"
+	businessTown "github.com/Selsynn/DiscordBotTest1/business/town"
+	"github.com/Selsynn/DiscordBotTest1/communication"
 	"github.com/Selsynn/DiscordBotTest1/town"
 )
 
 type Manager struct {
-	Towns map[talker.Server]*town.Town
+	Towns map[businessTown.ID]*town.Town
 }
 
-const command_shop = "shop"
-const command_heros = "heros"
-const create_merchant = "new merchant"
-const command_craft = "craft" //craft:bow
-
-func (m *Manager) Process(message talker.Message) talker.Order {
+func (m *Manager) Process(message communication.ActionToManager) communication.ActionFromManager {
 	//Get town
-	t, found := m.Towns[message.Server]
+	t, found := m.Towns[message.TownID]
 
 	if !found {
 		//No city found
 		t = town.New()
-		m.Towns[message.Server] = t
+		m.Towns[message.TownID] = t
 		fmt.Printf("Creation of a new city \n%#v\n", t)
 	}
 
@@ -32,35 +28,56 @@ func (m *Manager) Process(message talker.Message) talker.Order {
 
 	fmt.Printf("Describe WORLD \n%#v\n", m.Towns)
 
-	result := talker.Order{
-		Write: message.Write,
+	result := communication.ActionFromManager{
+		TownID: message.TownID,
 	}
 
-	index := strings.Index(message.Content, ":")
-	command := message.Content
-	if index != -1 {
-		command = message.Content[:index]
-	}
+	var resultContent string
 
-	switch command {
-	case command_shop:
-		result.Content = t.DescribeCity()
-	case create_merchant:
+	switch message.Command.ID() {
+	case command.ViewShop:
+		resultContent = t.DescribeCity()
+	case command.NewMerchant:
 		t.CreateMerchant()
-		result.Content = "Merchant created." + t.DescribeCity()
-	case command_heros:
-		result.Content = "You asked to see the heros" + t.DescribeHeros()
-	case command_craft:
-		t.Craft(t.Crafters[0],t.GetItem(message.Content[(index+1):]), a)
+		resultContent = "Merchant created." + t.DescribeCity()
+	case command.ViewHeros:
+		resultContent = "You asked to see the heros" + t.DescribeHeros()
+	case command.Craft:
+		craft := message.Command.(command.CommandCraft)
+		t.Craft(t.Crafters[0], t.GetItem(craft.ItemID), a)
 	default:
-		result.Content = "Il n'y a rien a cette adresse. List of all the command currently supported: **" + command_shop + "**, **" + command_heros + "**"
+		resultContent = fmt.Sprintf("Il n'y a rien a cette adresse. List of all the command currently supported: **%v**", command.ListAll())
 	}
+
+	result.Content = communication.ContentMessage{
+		Text: resultContent,
+	}
+
+	// index := strings.Index(message.Content, ":")
+	// command := message.Content
+	// if index != -1 {
+	// 	command = message.Content[:index]
+	// }
+
+	// switch command {
+	// case command_shop:
+	// 	result.Content = t.DescribeCity()
+	// case create_merchant:
+	// 	t.CreateMerchant()
+	// 	result.Content = "Merchant created." + t.DescribeCity()
+	// case command_heros:
+	// 	result.Content = "You asked to see the heros" + t.DescribeHeros()
+	// case command_craft:
+	// 	t.Craft(t.Crafters[0], t.GetItem(message.Content[(index+1):]), a)
+	// default:
+	// 	result.Content = "Il n'y a rien a cette adresse. List of all the command currently supported: **" + command_shop + "**, **" + command_heros + "**"
+	// }
 
 	return result
 }
 
 func NewManager() Manager {
 	return Manager{
-		Towns: make(map[talker.Server]*town.Town),
+		Towns: make(map[businessTown.ID]*town.Town),
 	}
 }

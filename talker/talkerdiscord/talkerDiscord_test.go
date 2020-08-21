@@ -28,17 +28,17 @@ func testNew() talker.Talker {
 	return t
 }
 
-func testNewServer() talker.Server {
-	s := ServerDiscord{
-		channelId: "",
-		name:      "Name",
-	}
-	return s
-}
+// func testNewServer() talker.Server {
+// 	s := ServerDiscord{
+// 		channelId: "",
+// 		name:      "Name",
+// 	}
+// 	return s
+// }
 
 func Shup() {
 	testNew()
-	testNewServer()
+	//testNewServer()
 }
 
 func TestWriteFormat(tester *testing.T) {
@@ -70,16 +70,11 @@ func TestWriteFormat(tester *testing.T) {
 			URL:    "https://www.linuxmint.com/img/ads/info.png",
 		},
 	}
-	o := talker.Order{
-		Content: "Chocolat",
-		Write: func(content string) {
-			_, err := t.session.ChannelMessageSendEmbed("735167412869005313", e)
-			if err == nil {
-				return
-			}
-			panic(err.Error())
-		},
-	}
 
-	t.Write(o)
+	_, err := t.session.ChannelMessageSendEmbed("735167412869005313", e)
+	if err == nil {
+		return
+	}
+	panic(err.Error())
+
 }
