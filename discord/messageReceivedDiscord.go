@@ -33,6 +33,7 @@ type MessageSentDiscord struct {
 	Server      ServerDiscord
 	Text        discordgo.MessageEmbed
 	ReactionIDs []discordreaction.ID
+	ParentErase *communication.ActionID
 }
 
 func (*MessageSentDiscord) ThisStructIsAMessageSent() {

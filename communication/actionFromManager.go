@@ -10,15 +10,16 @@ type ActionID string
 
 type ActionFromManager struct {
 	MessageID ActionID
-	Parent    *ActionFromManager
+	Parent    *ActionID
 	Content   ContentMessage
 	AllowList []*player.ID
 	TownID    town.ID
-	Callback  map[command.ID]func() *ActionFromManager
+	Callback  map[command.ID]func(ActionToManager) *ActionFromManager
 	//CleanUp  func()
 }
 
 type ContentMessage struct {
-	Text string
+	Text       string
+	ActionFlag map[command.ID]string
 	//AllActions []*ActionFromManager
 }

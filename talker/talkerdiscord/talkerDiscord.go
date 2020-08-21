@@ -108,7 +108,17 @@ func (t TalkerDiscord) Read() chan talker.MessageReceived {
 func (t TalkerDiscord) Write(i talker.MessageSent) communication.ActionID {
 	m := i.(*discord.MessageSentDiscord)
 
-	message, err := t.session.ChannelMessageSendEmbed(string(m.Server.ChannelID), &m.Text)
+	var message *discordgo.Message
+	var err error
+	if m.ParentErase == nil {
+		message, err = t.session.ChannelMessageSendEmbed(string(m.Server.ChannelID), &m.Text)
+	} else {
+		message, err = t.session.ChannelMessageEditEmbed(string(m.Server.ChannelID), string(*m.ParentErase), &m.Text)
+		if err != nil {
+			panic(err.Error())
+		}
+		err = t.session.MessageReactionsRemoveAll(string(m.Server.ChannelID), string(*m.ParentErase))
+	}
 
 	if err != nil {
 		panic(err.Error())

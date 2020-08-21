@@ -30,12 +30,16 @@ var command2Reaction = map[command.ID]ID{}
 
 func init() {
 	reaction2Command = map[ID]command.ID{
-		"✔": command.Accept,
+		"☑": command.Accept,
 		"❌": command.Refuse,
 		"⚔": command.Fight,
 		"⚒": command.Build,
 		"🛡": command.Protect,
 		"⚖": command.Sell,
+		"🌳": command.Wood,
+		"🧑": command.Profile,
+		"👀": command.Explore,
+		"⚙": command.Craft,
 	}
 
 	command2Reaction = map[command.ID]ID{}

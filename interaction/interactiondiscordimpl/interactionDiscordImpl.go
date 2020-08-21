@@ -45,13 +45,14 @@ func (i *InteractionDiscord) GetActionToManager(message talker.MessageReceived) 
 		server := i.GetOrCreateServer(v.Server.ID, v.Server.ChannelID)
 		result.TownID = i.GetTown(server)
 		result.PlayerID = i.GetPlayer(v.User, server)
-		result.ActionID = v.Message
+		result.ActionID = &v.Message
 		result.Command = i.GetCommandFromText(v.Text)
 	case *discord.ReactionReceiveDiscord:
 		server := i.GetOrCreateServer(v.Server.ID, v.Server.ChannelID)
 		result.TownID = i.GetTown(server)
 		result.PlayerID = i.GetPlayer(v.User, server)
-		result.ActionID = v.Message
+		result.ActionID = &v.Message
+		result.ParentID = &v.Message
 		result.Command = i.GetCommandFromReaction(v.Reaction)
 	}
 
@@ -72,6 +73,15 @@ func (i *InteractionDiscord) GetActionFromManager(message communication.ActionFr
 	result.Text = discordgo.MessageEmbed{
 		Title:       "You have a new message",
 		Description: message.Content.Text,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:  "Actions",
+				Value: getActionExplanationString(message.Content.ActionFlag),
+			},
+		},
+	}
+	if message.Parent != nil {
+		result.ParentErase = message.Parent
 	}
 
 	return &result
@@ -98,7 +108,7 @@ func (i *InteractionDiscord) GetCommandFromText(text string) command.Command {
 	return cmd
 }
 
-func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager) func() *communication.ActionFromManager {
+func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager) func(communication.ActionToManager) *communication.ActionFromManager {
 	server := i.GetServerFromTown(toManager.TownID)
 
 	checkInAllowList := func(allowList []*player.ID, playerID player.ID) bool {
@@ -111,7 +121,7 @@ func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager
 	}
 
 	for _, waitingAction := range server.WaitingActionsForPlayers {
-		if waitingAction.MessageID == toManager.ActionID && checkInAllowList(waitingAction.AllowList, toManager.PlayerID) {
+		if waitingAction.MessageID == *toManager.ParentID && checkInAllowList(waitingAction.AllowList, toManager.PlayerID) {
 			for expected, callback := range waitingAction.Callback {
 				if expected == toManager.Command.ID() {
 					return callback
@@ -136,4 +146,12 @@ func (i *InteractionDiscord) AddCallback(fromManager communication.ActionFromMan
 	server := i.GetServerFromTown(fromManager.TownID)
 	fromManager.MessageID = actionID
 	server.WaitingActionsForPlayers = append(server.WaitingActionsForPlayers, fromManager)
+}
+
+func getActionExplanationString(allActions map[command.ID]string) string {
+	result := ""
+	for command, explanation := range allActions {
+		result += string(discordreaction.Match2Reaction(command)) + " " + explanation + "\n"
+	}
+	return result
 }
