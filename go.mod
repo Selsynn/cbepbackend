@@ -1,4 +1,4 @@
-module github.com/Selsynn/DiscordBotTest1
+module github.com/Selsynn/craft-build-explore-protect-backend
 
 go 1.13
 

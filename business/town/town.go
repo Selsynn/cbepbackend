@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Selsynn/DiscordBotTest1/business/item"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/item"
 )
 
 type ID string

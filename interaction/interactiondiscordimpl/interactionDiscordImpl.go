@@ -3,14 +3,14 @@ package interactiondiscordimpl
 import (
 	"fmt"
 
-	"github.com/Selsynn/DiscordBotTest1/business/command"
-	"github.com/Selsynn/DiscordBotTest1/business/player"
-	"github.com/Selsynn/DiscordBotTest1/business/town"
-	"github.com/Selsynn/DiscordBotTest1/business/user"
-	"github.com/Selsynn/DiscordBotTest1/communication"
-	"github.com/Selsynn/DiscordBotTest1/discord"
-	"github.com/Selsynn/DiscordBotTest1/discord/discordreaction"
-	"github.com/Selsynn/DiscordBotTest1/talker"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/command"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/player"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/town"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/user"
+	"github.com/Selsynn/craft-build-explore-protect-backend /communication"
+	"github.com/Selsynn/craft-build-explore-protect-backend /discord"
+	"github.com/Selsynn/craft-build-explore-protect-backend /discord/discordreaction"
+	"github.com/Selsynn/craft-build-explore-protect-backend /talker"
 	"github.com/bwmarrin/discordgo"
 )
 

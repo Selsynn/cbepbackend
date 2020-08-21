@@ -1,8 +1,8 @@
 package discord
 
 import (
-	"github.com/Selsynn/DiscordBotTest1/business/user"
-	"github.com/Selsynn/DiscordBotTest1/discord/discordreaction"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/user"
+	"github.com/Selsynn/craft-build-explore-protect-backend /discord/discordreaction"
 	"github.com/bwmarrin/discordgo"
 )
 

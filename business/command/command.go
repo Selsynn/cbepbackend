@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Selsynn/DiscordBotTest1/business/item"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/item"
 )
 
 type ID string

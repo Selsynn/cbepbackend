@@ -1,10 +1,10 @@
 package discord
 
 import (
-	"github.com/Selsynn/DiscordBotTest1/business/player"
-	"github.com/Selsynn/DiscordBotTest1/business/town"
-	"github.com/Selsynn/DiscordBotTest1/business/user"
-	"github.com/Selsynn/DiscordBotTest1/communication"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/player"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/town"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/user"
+	"github.com/Selsynn/craft-build-explore-protect-backend /communication"
 )
 
 type ServerID string
@@ -17,5 +17,3 @@ type Server struct {
 	WaitingActionsForPlayers []communication.ActionFromManager
 	TownID                   town.ID
 }
-
-

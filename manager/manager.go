@@ -3,10 +3,10 @@ package manager
 import (
 	"fmt"
 
-	"github.com/Selsynn/DiscordBotTest1/business/command"
-	businessTown "github.com/Selsynn/DiscordBotTest1/business/town"
-	"github.com/Selsynn/DiscordBotTest1/communication"
-	"github.com/Selsynn/DiscordBotTest1/town"
+	"github.com/Selsynn/craft-build-explore-protect-backend /business/command"
+	businessTown "github.com/Selsynn/craft-build-explore-protect-backend /business/town"
+	"github.com/Selsynn/craft-build-explore-protect-backend /communication"
+	"github.com/Selsynn/craft-build-explore-protect-backend /town"
 )
 
 type Manager struct {

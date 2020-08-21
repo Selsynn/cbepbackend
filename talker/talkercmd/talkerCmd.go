@@ -3,7 +3,7 @@ package talkercmd
 import (
 	"fmt"
 
-	"github.com/Selsynn/DiscordBotTest1/talker"
+	"github.com/Selsynn/craft-build-explore-protect-backend /talker"
 )
 
 type TalkerCmd struct {

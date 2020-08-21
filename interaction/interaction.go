@@ -1,8 +1,8 @@
 package interaction
 
 import (
-	"github.com/Selsynn/DiscordBotTest1/communication"
-	"github.com/Selsynn/DiscordBotTest1/talker"
+	"github.com/Selsynn/craft-build-explore-protect-backend /communication"
+	"github.com/Selsynn/craft-build-explore-protect-backend /talker"
 )
 
 type Interaction interface {

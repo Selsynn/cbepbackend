@@ -7,13 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Selsynn/DiscordBotTest1/discord"
-	"github.com/Selsynn/DiscordBotTest1/interaction"
-	"github.com/Selsynn/DiscordBotTest1/interaction/interactiondiscordimpl"
-	"github.com/Selsynn/DiscordBotTest1/manager"
-	"github.com/Selsynn/DiscordBotTest1/talker"
-	"github.com/Selsynn/DiscordBotTest1/talker/talkercmd"
-	"github.com/Selsynn/DiscordBotTest1/talker/talkerdiscord"
+	"github.com/Selsynn/craft-build-explore-protect-backend /discord"
+	"github.com/Selsynn/craft-build-explore-protect-backend /interaction"
+	"github.com/Selsynn/craft-build-explore-protect-backend /interaction/interactiondiscordimpl"
+	"github.com/Selsynn/craft-build-explore-protect-backend /manager"
+	"github.com/Selsynn/craft-build-explore-protect-backend /talker"
+	"github.com/Selsynn/craft-build-explore-protect-backend /talker/talkercmd"
+	"github.com/Selsynn/craft-build-explore-protect-backend /talker/talkerdiscord"
 )
 
 // Variables used for command line parameters
