@@ -9,5 +9,6 @@ import (
 type ActionToManager struct {
 	TownID   town.ID
 	PlayerID player.ID
+	ActionID ActionID
 	Command  command.Command
 }

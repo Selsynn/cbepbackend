@@ -7,12 +7,12 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Selsynn/cbepbackend/communication"
 	"github.com/Selsynn/cbepbackend/discord"
 	"github.com/Selsynn/cbepbackend/interaction"
 	"github.com/Selsynn/cbepbackend/interaction/interactiondiscordimpl"
 	"github.com/Selsynn/cbepbackend/manager"
 	"github.com/Selsynn/cbepbackend/talker"
-	"github.com/Selsynn/cbepbackend/talker/talkercmd"
 	"github.com/Selsynn/cbepbackend/talker/talkerdiscord"
 )
 
@@ -41,12 +41,12 @@ func main() {
 		var shutdownTalker func()
 		t, shutdownTalker = talkerdiscord.NewTalkerDiscord(Token)
 		i = &interactiondiscordimpl.InteractionDiscord{
-			Servers: make(map[discord.ServerID]discord.Server),
+			Servers: make(map[discord.ServerID]*discord.Server),
 		}
 		defer shutdownTalker()
 	case "cmd":
 		fmt.Printf("BotImplementation chosen: Cmd\n")
-		t = talkercmd.New()
+		//t = talkercmd.New()
 	default:
 		panic("verify parameters")
 	}
@@ -58,13 +58,23 @@ func main() {
 			if toManager.Command == nil {
 				continue
 			}
-			processed := m.Process(toManager)
-			fromManager := i.GetActionFromManager(processed)
-			t.Write(fromManager)
+			var processed *communication.ActionFromManager
+
+			callback := i.GetCallback(toManager)
+			if callback != nil {
+				processed = callback()
+			} else {
+				processed = m.Process(toManager)
+			}
+
+			if processed == nil {
+				continue
+			}
+
+			fromManager := i.GetActionFromManager(*processed)
+			messageID := t.Write(fromManager)
+			i.AddCallback(*processed, messageID)
 		}
-		// 	order := m.Process(mess)
-		// 	order.Write(order.Content)
-		// }
 	}()
 
 	// Wait here until CTRL-C or other term signal is received.

@@ -4,16 +4,16 @@ import (
 	"fmt"
 
 	"github.com/Selsynn/cbepbackend/business/command"
+	"github.com/Selsynn/cbepbackend/business/player"
 	"github.com/Selsynn/cbepbackend/business/town"
-	businessTown "github.com/Selsynn/cbepbackend/business/town"
 	"github.com/Selsynn/cbepbackend/communication"
 )
 
 type Manager struct {
-	Towns map[businessTown.ID]*town.Town
+	Towns map[town.ID]*town.Town
 }
 
-func (m *Manager) Process(message communication.ActionToManager) communication.ActionFromManager {
+func (m *Manager) Process(message communication.ActionToManager) *communication.ActionFromManager {
 	//Get town
 	t, found := m.Towns[message.TownID]
 
@@ -28,8 +28,11 @@ func (m *Manager) Process(message communication.ActionToManager) communication.A
 
 	fmt.Printf("Describe WORLD \n%#v\n", m.Towns)
 
-	result := communication.ActionFromManager{
+	result := &communication.ActionFromManager{
 		TownID: message.TownID,
+		AllowList: []*player.ID{
+			&message.PlayerID,
+		},
 	}
 
 	var resultContent string
@@ -40,6 +43,12 @@ func (m *Manager) Process(message communication.ActionToManager) communication.A
 	case command.NewMerchant:
 		t.CreateMerchant()
 		resultContent = "Merchant created." + t.DescribeCity()
+		result.Callback = map[command.ID]func() *communication.ActionFromManager{
+			command.Accept: func() *communication.ActionFromManager {
+				fmt.Println("Accepted !")
+				return nil
+			},
+		}
 	case command.ViewHeros:
 		resultContent = "You asked to see the heros" + t.DescribeHeros()
 	case command.Craft:
@@ -53,31 +62,11 @@ func (m *Manager) Process(message communication.ActionToManager) communication.A
 		Text: resultContent,
 	}
 
-	// index := strings.Index(message.Content, ":")
-	// command := message.Content
-	// if index != -1 {
-	// 	command = message.Content[:index]
-	// }
-
-	// switch command {
-	// case command_shop:
-	// 	result.Content = t.DescribeCity()
-	// case create_merchant:
-	// 	t.CreateMerchant()
-	// 	result.Content = "Merchant created." + t.DescribeCity()
-	// case command_heros:
-	// 	result.Content = "You asked to see the heros" + t.DescribeHeros()
-	// case command_craft:
-	// 	t.Craft(t.Crafters[0], t.GetItem(message.Content[(index+1):]), a)
-	// default:
-	// 	result.Content = "Il n'y a rien a cette adresse. List of all the command currently supported: **" + command_shop + "**, **" + command_heros + "**"
-	// }
-
 	return result
 }
 
 func NewManager() Manager {
 	return Manager{
-		Towns: make(map[businessTown.ID]*town.Town),
+		Towns: make(map[town.ID]*town.Town),
 	}
 }

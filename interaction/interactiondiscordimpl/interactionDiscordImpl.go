@@ -16,24 +16,24 @@ import (
 )
 
 type InteractionDiscord struct {
-	Servers map[discord.ServerID]discord.Server
+	Servers map[discord.ServerID]*discord.Server
 }
 
-func (i *InteractionDiscord) GetOrCreateServer(serverID discord.ServerID, channelID discord.ChannelID) discord.Server {
+func (i *InteractionDiscord) GetOrCreateServer(serverID discord.ServerID, channelID discord.ChannelID) *discord.Server {
 	if _, ok := i.Servers[serverID]; !ok {
 		newTown := town.New()
-		i.Servers[serverID] = discord.Server{
+		i.Servers[serverID] = &discord.Server{
 			ID:                       serverID,
 			ChannelID:                channelID,
 			PlayerAdventurers:        make(map[user.ID]player.ID),
 			TownID:                   newTown.ID,
-			WaitingActionsForPlayers: make([]communication.ActionFromManager, 10),
+			WaitingActionsForPlayers: []communication.ActionFromManager{},
 		}
 	}
 	return i.Servers[serverID]
 }
 
-func (i *InteractionDiscord) GetTown(server discord.Server) town.ID {
+func (i *InteractionDiscord) GetTown(server *discord.Server) town.ID {
 	return server.TownID
 }
 
@@ -45,12 +45,14 @@ func (i *InteractionDiscord) GetActionToManager(message talker.MessageReceived) 
 		server := i.GetOrCreateServer(v.Server.ID, v.Server.ChannelID)
 		result.TownID = i.GetTown(server)
 		result.PlayerID = i.GetPlayer(v.User, server)
+		result.ActionID = v.Message
 		result.Command = i.GetCommandFromText(v.Text)
 	case *discord.ReactionReceiveDiscord:
 		server := i.GetOrCreateServer(v.Server.ID, v.Server.ChannelID)
 		result.TownID = i.GetTown(server)
 		result.PlayerID = i.GetPlayer(v.User, server)
-		result.Command = i.GetCommandFromReaction(v.Message, v.Reaction, server, result.PlayerID)
+		result.ActionID = v.Message
+		result.Command = i.GetCommandFromReaction(v.Reaction)
 	}
 
 	return result
@@ -65,7 +67,7 @@ func (i *InteractionDiscord) GetActionFromManager(message communication.ActionFr
 		},
 	}
 	for command := range message.Callback {
-		result.ReactionIDs = append(result.ReactionIDs, discordreaction.Match2Reaction(command.ID()))
+		result.ReactionIDs = append(result.ReactionIDs, discordreaction.Match2Reaction(command))
 	}
 	result.Text = discordgo.MessageEmbed{
 		Title:       "You have a new message",
@@ -75,29 +77,17 @@ func (i *InteractionDiscord) GetActionFromManager(message communication.ActionFr
 	return &result
 }
 
-func (i *InteractionDiscord) GetPlayer(user user.ID, server discord.Server) player.ID {
+func (i *InteractionDiscord) GetPlayer(user user.ID, server *discord.Server) player.ID {
 	if _, ok := server.PlayerAdventurers[user]; !ok {
 		server.PlayerAdventurers[user] = player.ID(uuid.New().String())
 	}
-	//TODO new user creation
 	return server.PlayerAdventurers[user]
 }
 
-func (i *InteractionDiscord) GetCommandFromReaction(message discord.MessageID, reaction discordreaction.ID, server discord.Server, playerID player.ID) command.Command {
-	// checkInAllowList := func(allowList []*player.ID, playerID player.ID) bool {
-	// 	for _, allowed := range allowList {
-	// 		if *allowed == playerID {
-	// 			return true
-	// 		}
-	// 	}
-	// 	return false
-	// }
-	// for _, waitingAction := range server.WaitingActionsForPlayers {
-	// 	if checkInAllowList(waitingAction.AllowList, playerID) &&  {
-
-	// 	}
-	// }
-	return nil
+func (i *InteractionDiscord) GetCommandFromReaction(reaction discordreaction.ID) command.Command {
+	return command.CommandSimple{
+		Id: discordreaction.Match2Command(reaction),
+	}
 }
 
 func (i *InteractionDiscord) GetCommandFromText(text string) command.Command {
@@ -108,7 +98,31 @@ func (i *InteractionDiscord) GetCommandFromText(text string) command.Command {
 	return cmd
 }
 
-func (i *InteractionDiscord) GetServerFromTown(town town.ID) discord.Server {
+func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager) func() *communication.ActionFromManager {
+	server := i.GetServerFromTown(toManager.TownID)
+
+	checkInAllowList := func(allowList []*player.ID, playerID player.ID) bool {
+		for _, allowed := range allowList {
+			if *allowed == playerID {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, waitingAction := range server.WaitingActionsForPlayers {
+		if waitingAction.MessageID == toManager.ActionID && checkInAllowList(waitingAction.AllowList, toManager.PlayerID) {
+			for expected, callback := range waitingAction.Callback {
+				if expected == toManager.Command.ID() {
+					return callback
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (i *InteractionDiscord) GetServerFromTown(town town.ID) *discord.Server {
 	for _, server := range i.Servers {
 		if server.TownID == town {
 			return server
@@ -116,4 +130,10 @@ func (i *InteractionDiscord) GetServerFromTown(town town.ID) discord.Server {
 	}
 	panic("No server found for the town " + town)
 
+}
+
+func (i *InteractionDiscord) AddCallback(fromManager communication.ActionFromManager, actionID communication.ActionID) {
+	server := i.GetServerFromTown(fromManager.TownID)
+	fromManager.MessageID = actionID
+	server.WaitingActionsForPlayers = append(server.WaitingActionsForPlayers, fromManager)
 }

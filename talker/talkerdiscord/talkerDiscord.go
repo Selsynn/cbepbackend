@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Selsynn/cbepbackend/business/user"
+	"github.com/Selsynn/cbepbackend/communication"
 	"github.com/Selsynn/cbepbackend/discord"
 	"github.com/Selsynn/cbepbackend/discord/discordreaction"
 	"github.com/Selsynn/cbepbackend/talker"
@@ -69,7 +70,7 @@ func messageCreate(t *TalkerDiscord) func(s *discordgo.Session, m *discordgo.Mes
 				ChannelID: discord.ChannelID(m.ChannelID),
 				ID:        discord.ServerID(m.GuildID),
 			},
-			Message: discord.MessageID(m.Message.ID),
+			Message: communication.ActionID(m.Message.ID),
 			Text:    m.Content,
 			User:    user.ID(m.Author.ID),
 		}
@@ -91,7 +92,7 @@ func messageReactionAdd(t *TalkerDiscord) func(s *discordgo.Session, m *discordg
 				ChannelID: discord.ChannelID(m.ChannelID),
 				ID:        discord.ServerID(m.GuildID),
 			},
-			Message:  discord.MessageID(m.MessageID),
+			Message:  communication.ActionID(m.MessageID),
 			Reaction: discordreaction.ID(m.Emoji.Name),
 			User:     user.ID(m.UserID),
 		}
@@ -104,7 +105,7 @@ func (t TalkerDiscord) Read() chan talker.MessageReceived {
 	return t.messageCh
 }
 
-func (t TalkerDiscord) Write(i talker.MessageSent) {
+func (t TalkerDiscord) Write(i talker.MessageSent) communication.ActionID {
 	m := i.(*discord.MessageSentDiscord)
 
 	message, err := t.session.ChannelMessageSendEmbed(string(m.Server.ChannelID), &m.Text)
@@ -120,6 +121,8 @@ func (t TalkerDiscord) Write(i talker.MessageSent) {
 			fmt.Printf("Trying to send %s %s\n", reaction, err)
 		}
 	}
+
+	return communication.ActionID(message.ID)
 }
 
 func (t TalkerDiscord) Shutdown() {

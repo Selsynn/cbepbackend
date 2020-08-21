@@ -1,8 +1,10 @@
 package talker
 
+import "github.com/Selsynn/cbepbackend/communication"
+
 type Talker interface {
 	Read() chan MessageReceived
-	Write(MessageSent)
+	Write(MessageSent) communication.ActionID
 }
 
 // type Message struct {

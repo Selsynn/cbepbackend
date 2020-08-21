@@ -6,12 +6,15 @@ import (
 	"github.com/Selsynn/cbepbackend/business/town"
 )
 
+type ActionID string
+
 type ActionFromManager struct {
+	MessageID ActionID
 	Parent    *ActionFromManager
 	Content   ContentMessage
 	AllowList []*player.ID
 	TownID    town.ID
-	Callback  map[command.Command]func(ActionFromManager)
+	Callback  map[command.ID]func() *ActionFromManager
 	//CleanUp  func()
 }
 

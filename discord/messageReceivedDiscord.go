@@ -2,6 +2,7 @@ package discord
 
 import (
 	"github.com/Selsynn/cbepbackend/business/user"
+	"github.com/Selsynn/cbepbackend/communication"
 	"github.com/Selsynn/cbepbackend/discord/discordreaction"
 	"github.com/bwmarrin/discordgo"
 )
@@ -9,18 +10,16 @@ import (
 type TextReceiveDiscord struct {
 	Server  ServerDiscord
 	Text    string
-	Message MessageID
+	Message communication.ActionID
 	User    user.ID
 }
 
 type ReactionReceiveDiscord struct {
 	Server   ServerDiscord
 	Reaction discordreaction.ID
-	Message  MessageID
+	Message  communication.ActionID
 	User     user.ID
 }
-
-type MessageID string
 
 func (*ReactionReceiveDiscord) ThisStructIsAMessageReceive() {
 
