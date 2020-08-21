@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/Selsynn/cbepbackend/business/command"
+	"github.com/Selsynn/cbepbackend/business/town"
 	businessTown "github.com/Selsynn/cbepbackend/business/town"
 	"github.com/Selsynn/cbepbackend/communication"
-	"github.com/Selsynn/cbepbackend/town"
 )
 
 type Manager struct {
