@@ -1,3 +1,4 @@
 secret.env
 .vscode/launch.json
 cbepbackend
+__debug_bin
