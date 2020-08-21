@@ -54,7 +54,13 @@ func main() {
 	m := manager.NewManager()
 	go func() {
 		for mess := range t.Read() {
-			t.Write(i.GetActionFromManager(m.Process(i.GetActionToManager(mess))))
+			toManager := i.GetActionToManager(mess)
+			if toManager.Command == nil {
+				continue
+			}
+			processed := m.Process(toManager)
+			fromManager := i.GetActionFromManager(processed)
+			t.Write(fromManager)
 		}
 		// 	order := m.Process(mess)
 		// 	order.Write(order.Content)

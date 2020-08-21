@@ -12,6 +12,7 @@ import (
 	"github.com/Selsynn/cbepbackend/discord/discordreaction"
 	"github.com/Selsynn/cbepbackend/talker"
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/uuid"
 )
 
 type InteractionDiscord struct {
@@ -75,6 +76,9 @@ func (i *InteractionDiscord) GetActionFromManager(message communication.ActionFr
 }
 
 func (i *InteractionDiscord) GetPlayer(user user.ID, server discord.Server) player.ID {
+	if _, ok := server.PlayerAdventurers[user]; !ok {
+		server.PlayerAdventurers[user] = player.ID(uuid.New().String())
+	}
 	//TODO new user creation
 	return server.PlayerAdventurers[user]
 }
