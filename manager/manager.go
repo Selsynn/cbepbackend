@@ -59,7 +59,7 @@ func (m *Manager) Process(message communication.ActionToManager) *communication.
 					},
 				},
 				TownID: t.ID,
-				Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
+				Callback: map[command.ID]communication.ActionCallback{
 					command.Profile: m.Profile,
 				},
 			}
@@ -72,7 +72,7 @@ func (m *Manager) Process(message communication.ActionToManager) *communication.
 				command.Profile: "See my profile",
 			},
 		}
-		result.Callback = map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
+		result.Callback = map[command.ID]communication.ActionCallback{
 			command.Profile: m.Profile,
 		}
 
@@ -114,25 +114,90 @@ func (m *Manager) CreateTown() town.ID {
 	return t.ID
 }
 
-func (m *Manager) Explore(message communication.ActionToManager) *communication.ActionFromManager {
+func (m *Manager) ExploreDeep(message communication.ActionToManager, rid town.RegionID) *communication.ActionFromManager {
+	a := m.Towns[message.TownID].Adventurers[message.PlayerID]
+
+	for _, region := range m.Towns[message.TownID].Regions {
+		if region.Name == rid {
+			actions := GetAvailableActions(region.Name, region.Level, a, m.Towns[message.TownID], map[command.ID]communication.DescriptionAction{
+				command.Profile: {
+					CID:         command.Profile,
+					Callback:    m.Profile,
+					Description: "To profile",
+				},
+				command.Back: {
+					CID:         command.Back,
+					Callback:    m.Explore,
+					Description: "Back",
+				},
+			})
+
+			callback := map[command.ID]communication.ActionCallback{}
+			actionsFlag := map[command.ID]string{}
+			for _, action := range actions {
+				callback[action.CID] = action.Callback
+				actionsFlag[action.CID] = action.Description
+			}
+
+			return &communication.ActionFromManager{
+				TownID: message.TownID,
+				AllowList: []*player.ID{
+					&message.PlayerID,
+				},
+				Callback: callback,
+				Content: communication.ContentMessage{
+					Text:       "You are exploring " + string(rid),
+					ActionFlag: actionsFlag,
+				},
+				Parent: message.ParentID,
+			}
+		}
+	}
 	return &communication.ActionFromManager{
 		TownID: message.TownID,
 		AllowList: []*player.ID{
 			&message.PlayerID,
 		},
-		Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
-			command.Wood: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.ExploreWoods(action)
-			},
+		Callback: map[command.ID]communication.ActionCallback{
+			command.Profile: m.Profile,
+			command.Explore: m.Explore,
 		},
 		Content: communication.ContentMessage{
-			Text: "Exploration asked.",
+			Text: "No action found in exploring " + string(rid),
 			ActionFlag: map[command.ID]string{
-				command.Wood: "Go into the Enchanted Forest",
+				command.Profile: "Go back to the profile",
+				command.Explore: "Go back to the exploration",
 			},
 		},
 		Parent: message.ParentID,
 	}
+
+}
+
+func (m *Manager) Explore(message communication.ActionToManager) *communication.ActionFromManager {
+
+	callback := map[command.ID]communication.ActionCallback{}
+	actionsFlag := map[command.ID]string{}
+	for _, region := range m.Towns[message.TownID].Regions {
+		callback[region.Command] = func(message communication.ActionToManager) *communication.ActionFromManager {
+			return m.ExploreDeep(message, region.Name)
+		}
+		actionsFlag[region.Command] = "Explore in " + string(region.Name)
+	}
+	result := &communication.ActionFromManager{
+		TownID: message.TownID,
+		AllowList: []*player.ID{
+			&message.PlayerID,
+		},
+		Callback: callback,
+		Content: communication.ContentMessage{
+			Text:       "Exploration asked.",
+			ActionFlag: actionsFlag,
+		},
+		Parent: message.ParentID,
+	}
+
+	return result
 }
 
 func (m *Manager) Profile(message communication.ActionToManager) *communication.ActionFromManager {
@@ -141,16 +206,10 @@ func (m *Manager) Profile(message communication.ActionToManager) *communication.
 		AllowList: []*player.ID{
 			&message.PlayerID,
 		},
-		Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
-			command.Explore: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.Explore(action)
-			},
-			command.Craft: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.Craft(action)
-			},
-			command.Sell: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.Sell(action)
-			},
+		Callback: map[command.ID]communication.ActionCallback{
+			command.Explore: m.Explore,
+			command.Craft:   m.Craft,
+			command.Sell:    m.Sell,
 		},
 		Content: communication.ContentMessage{
 			Text: "Profile asked.",
@@ -170,18 +229,16 @@ func (m *Manager) Craft(message communication.ActionToManager) *communication.Ac
 		AllowList: []*player.ID{
 			&message.PlayerID,
 		},
-		Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
-			command.Fight: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.CraftElement(action, town.WeaponCrafter)
-			},
-			command.Profile: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.Profile(action)
-			},
+		Callback: map[command.ID]communication.ActionCallback{
+			// command.Fight: func(action communication.ActionToManager) *communication.ActionFromManager {
+			// 	return m.CraftElement(action, town.WeaponCrafter)
+			// },
+			command.Profile: m.Profile,
 		},
 		Content: communication.ContentMessage{
 			Text: "Craft (WIP)",
 			ActionFlag: map[command.ID]string{
-				command.Fight:   "Ask the weapon crafter to craft a weapon for you",
+				//command.Fight:   "Ask the weapon crafter to craft a weapon for you",
 				command.Profile: "Go back to your profile",
 			},
 		},
@@ -195,16 +252,10 @@ func (m *Manager) Sell(message communication.ActionToManager) *communication.Act
 		AllowList: []*player.ID{
 			&message.PlayerID,
 		},
-		Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
-			command.Explore: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.Explore(action)
-			},
-			command.Craft: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.Craft(action)
-			},
-			command.Sell: func(action communication.ActionToManager) *communication.ActionFromManager {
-				return m.Sell(action)
-			},
+		Callback: map[command.ID]communication.ActionCallback{
+			command.Explore: m.Explore,
+			command.Craft:   m.Craft,
+			command.Sell:    m.Sell,
 		},
 		Content: communication.ContentMessage{
 			Text: "Sell (WIP)",
@@ -218,72 +269,72 @@ func (m *Manager) Sell(message communication.ActionToManager) *communication.Act
 	}
 }
 
-func (m *Manager) CraftElement(message communication.ActionToManager, specialty town.Profession) *communication.ActionFromManager {
-	fmt.Println("Craft - " + specialty)
-	resultCraft := "You asked the " + string(specialty) + " to craft something."
-	result := &communication.ActionFromManager{
-		TownID: message.TownID,
-		AllowList: []*player.ID{
-			&message.PlayerID,
-		},
-		Parent: message.ParentID,
-		Content: communication.ContentMessage{
-			Text: resultCraft,
-			ActionFlag: map[command.ID]string{
-				//command.Bow:    "Craft a bow (cost 10 woods - time 1 hu)",
-				command.Refuse: "Cancel",
-			},
-		},
-		Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
-			// command.Bow: func(action communication.ActionToManager) *communication.ActionFromManager {
-			// 	fmt.Println("Craft bow")
-			// 	return m.Profile(action)
-			// },
-			command.Refuse: func(action communication.ActionToManager) *communication.ActionFromManager {
-				fmt.Println("Cancel ")
-				return m.Craft(action)
-			},
-		},
-	}
+// func (m *Manager) CraftElement(message communication.ActionToManager, specialty town.Profession) *communication.ActionFromManager {
+// 	fmt.Println("Craft - " + specialty)
+// 	resultCraft := "You asked the " + string(specialty) + " to craft something."
+// 	result := &communication.ActionFromManager{
+// 		TownID: message.TownID,
+// 		AllowList: []*player.ID{
+// 			&message.PlayerID,
+// 		},
+// 		Parent: message.ParentID,
+// 		Content: communication.ContentMessage{
+// 			Text: resultCraft,
+// 			ActionFlag: map[command.ID]string{
+// 				//command.Bow:    "Craft a bow (cost 10 woods - time 1 hu)",
+// 				command.Refuse: "Cancel",
+// 			},
+// 		},
+// 		Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
+// 			// command.Bow: func(action communication.ActionToManager) *communication.ActionFromManager {
+// 			// 	fmt.Println("Craft bow")
+// 			// 	return m.Profile(action)
+// 			// },
+// 			command.Refuse: func(action communication.ActionToManager) *communication.ActionFromManager {
+// 				fmt.Println("Cancel ")
+// 				return m.Craft(action)
+// 			},
+// 		},
+// 	}
 
-	crafter := m.Towns[message.TownID].NPC[specialty]
+// 	crafter := m.Towns[message.TownID].NPC[specialty]
 
-	for _, element := range crafter.Knowledge {
-		stringDescr := ""
-		for _, cost := range element.Cost {
-			stringDescr += cost.Describe() + " "
-		}
-		result.Content.Text = fmt.Sprintf("%s \n***%s***\n--Cost: %s\n--Time: %f Time Unit", result.Content.Text, element.Item.Name, stringDescr, element.WorkCost)
-	}
+// 	for _, element := range crafter.Knowledge {
+// 		stringDescr := ""
+// 		for _, cost := range element.Cost {
+// 			stringDescr += cost.Describe() + " "
+// 		}
+// 		result.Content.Text = fmt.Sprintf("%s \n***%s***\n--Cost: %s\n--Time: %f Time Unit", result.Content.Text, element.Item.Name, stringDescr, element.WorkCost)
+// 	}
 
-	return result
-}
+// 	return result
+// }
 
-func (m *Manager) ExploreWoods(message communication.ActionToManager) *communication.ActionFromManager {
-	fmt.Println("Explore - Enchanted Forest !")
-	resultExploration := "You have found xxx"
-	return &communication.ActionFromManager{
-		TownID: message.TownID,
-		AllowList: []*player.ID{
-			&message.PlayerID,
-		},
-		Parent: message.ParentID,
-		Content: communication.ContentMessage{
-			Text: resultExploration,
-			ActionFlag: map[command.ID]string{
-				command.Accept: "Accept",
-				command.Refuse: "Refuse (try a reload)",
-			},
-		},
-		Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
-			command.Accept: func(action communication.ActionToManager) *communication.ActionFromManager {
-				fmt.Println("Explore - Enchanted Forest - Accepted !")
-				return m.Profile(action)
-			},
-			command.Refuse: func(action communication.ActionToManager) *communication.ActionFromManager {
-				fmt.Println("Explore - Enchanted Forest - Retry !")
-				return m.ExploreWoods(action)
-			},
-		},
-	}
-}
+// func (m *Manager) ExploreWoods(message communication.ActionToManager) *communication.ActionFromManager {
+// 	fmt.Println("Explore - Enchanted Forest !")
+// 	resultExploration := "You have found xxx"
+// 	return &communication.ActionFromManager{
+// 		TownID: message.TownID,
+// 		AllowList: []*player.ID{
+// 			&message.PlayerID,
+// 		},
+// 		Parent: message.ParentID,
+// 		Content: communication.ContentMessage{
+// 			Text: resultExploration,
+// 			ActionFlag: map[command.ID]string{
+// 				command.Accept: "Accept",
+// 				command.Refuse: "Refuse (try a reload)",
+// 			},
+// 		},
+// 		Callback: map[command.ID]func(communication.ActionToManager) *communication.ActionFromManager{
+// 			command.Accept: func(action communication.ActionToManager) *communication.ActionFromManager {
+// 				fmt.Println("Explore - Enchanted Forest - Accepted !")
+// 				return m.Profile(action)
+// 			},
+// 			command.Refuse: func(action communication.ActionToManager) *communication.ActionFromManager {
+// 				fmt.Println("Explore - Enchanted Forest - Retry !")
+// 				return m.ExploreWoods(action)
+// 			},
+// 		},
+// 	}
+// }

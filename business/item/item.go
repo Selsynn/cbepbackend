@@ -3,6 +3,7 @@ package item
 type ID string
 
 const (
-	Bow  ID = "bow"
-	Wood ID = "wood"
+	Bow     ID = "bow"
+	Wood    ID = "wood"
+	Leather ID = "leather"
 )

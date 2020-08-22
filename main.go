@@ -62,6 +62,7 @@ func main() {
 
 			callback := i.GetCallback(toManager)
 			if callback != nil {
+				i.CleanCallback(toManager)
 				processed = callback(toManager)
 			} else {
 				processed = m.Process(toManager)

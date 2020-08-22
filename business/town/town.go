@@ -50,17 +50,18 @@ type (
 		Name UpgradeName
 	}
 
-	RegionName string
-	Region     struct {
-		Name    string
-		Level   int
+	RegionID    string
+	RegionLevel int
+	Region      struct {
+		Name    RegionID
+		Level   RegionLevel
 		Command command.ID
-		Actions map[command.ID]RegionAction
 	}
+)
 
-	RegionAction interface {
-		ThisIsARegionAction()
-	}
+const (
+	Forest          RegionID = "Forest"
+	EnchantedForest RegionID = "Enchanted Forest"
 )
 
 func New() *Town {
@@ -107,7 +108,13 @@ func New() *Town {
 		Threat:            0,
 		Villagers:         3,
 		ID:                ID(uuid.New().String()),
-		Regions:           []*Region{},
+		Regions: []*Region{
+			{
+				Name:    Forest,
+				Command: command.Wood,
+				Level:   RegionLevel(1),
+			},
+		},
 	}
 
 	//t.CreateMerchant()

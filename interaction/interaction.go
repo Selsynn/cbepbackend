@@ -11,4 +11,5 @@ type Interaction interface {
 	GetActionFromManager(message communication.ActionFromManager) talker.MessageSent
 	GetCallback(toManager communication.ActionToManager) func(communication.ActionToManager) *communication.ActionFromManager
 	AddCallback(fromManager communication.ActionFromManager, actionID communication.ActionID)
+	CleanCallback(toManager communication.ActionToManager)
 }

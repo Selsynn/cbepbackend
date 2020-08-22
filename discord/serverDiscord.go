@@ -1,6 +1,8 @@
 package discord
 
 import (
+	"sync"
+
 	"github.com/Selsynn/cbepbackend/business/player"
 	"github.com/Selsynn/cbepbackend/business/town"
 	"github.com/Selsynn/cbepbackend/business/user"
@@ -16,4 +18,5 @@ type Server struct {
 	PlayerAdventurers        map[user.ID]player.ID
 	WaitingActionsForPlayers []communication.ActionFromManager
 	Town                     town.ID
+	HistoricActionsMutex     sync.RWMutex
 }

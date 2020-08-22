@@ -41,6 +41,9 @@ func init() {
 		"👀": command.Explore,
 		"⚙": command.Craft,
 		"🏹": command.Bow,
+		"🔙": command.Back,
+		"🌇": command.Town,
+		"🌲": command.EnchantedForest,
 	}
 
 	command2Reaction = map[command.ID]ID{}

@@ -121,6 +121,8 @@ func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager
 		return false
 	}
 
+	server.HistoricActionsMutex.RLock()
+	defer server.HistoricActionsMutex.RUnlock()
 	for _, waitingAction := range server.WaitingActionsForPlayers {
 		if toManager.ParentID != nil && waitingAction.MessageID == *toManager.ParentID && checkInAllowList(waitingAction.AllowList, toManager.PlayerID) {
 			for expected, callback := range waitingAction.Callback {
@@ -146,7 +148,9 @@ func (i *InteractionDiscord) GetServerFromTown(town town.ID) *discord.Server {
 func (i *InteractionDiscord) AddCallback(fromManager communication.ActionFromManager, actionID communication.ActionID) {
 	server := i.GetServerFromTown(fromManager.TownID)
 	fromManager.MessageID = actionID
+	server.HistoricActionsMutex.Lock()
 	server.WaitingActionsForPlayers = append(server.WaitingActionsForPlayers, fromManager)
+	server.HistoricActionsMutex.Unlock()
 }
 
 func getActionExplanationString(allActions map[command.ID]string) string {
@@ -155,4 +159,19 @@ func getActionExplanationString(allActions map[command.ID]string) string {
 		result += string(discordreaction.Match2Reaction(command)) + " " + explanation + "\n"
 	}
 	return result
+}
+
+func (i *InteractionDiscord) CleanCallback(toManager communication.ActionToManager) {
+	server := i.GetServerFromTown(toManager.TownID)
+
+	server.HistoricActionsMutex.Lock()
+	serverWaiting := make([]communication.ActionFromManager, len(server.WaitingActionsForPlayers))
+	for _, waitingAction := range server.WaitingActionsForPlayers {
+		if waitingAction.MessageID != *toManager.ParentID {
+			serverWaiting = append(serverWaiting, waitingAction)
+		}
+	}
+	server.WaitingActionsForPlayers = serverWaiting
+	server.HistoricActionsMutex.Unlock()
+
 }

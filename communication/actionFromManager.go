@@ -14,7 +14,7 @@ type ActionFromManager struct {
 	Content   ContentMessage
 	AllowList []*player.ID
 	TownID    town.ID
-	Callback  map[command.ID]func(ActionToManager) *ActionFromManager
+	Callback  map[command.ID]ActionCallback
 	//CleanUp  func()
 }
 
@@ -22,3 +22,11 @@ type ContentMessage struct {
 	Text       string
 	ActionFlag map[command.ID]string
 }
+
+type DescriptionAction struct {
+	CID         command.ID
+	Description string
+	Callback    ActionCallback
+}
+
+type ActionCallback func(ActionToManager) *ActionFromManager
