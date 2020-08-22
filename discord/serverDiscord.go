@@ -15,5 +15,5 @@ type Server struct {
 	ChannelID                ChannelID
 	PlayerAdventurers        map[user.ID]player.ID
 	WaitingActionsForPlayers []communication.ActionFromManager
-	TownID                   town.ID
+	Town                     town.ID
 }

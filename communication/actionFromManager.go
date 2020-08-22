@@ -21,5 +21,4 @@ type ActionFromManager struct {
 type ContentMessage struct {
 	Text       string
 	ActionFlag map[command.ID]string
-	//AllActions []*ActionFromManager
 }

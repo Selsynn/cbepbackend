@@ -11,8 +11,9 @@ type ID string
 
 const (
 	//BASIC CMD
-	Explore ID = "Explore"
-	Profile ID = "Profile"
+	Explore       ID = "Explore"
+	Profile       ID = "Profile"
+	CreateProfile ID = "Create profile"
 	//CONTEXT CMD
 
 	// ViewShop    ID = "shop"
@@ -26,6 +27,7 @@ const (
 	Protect ID = "Protect"
 	Sell    ID = "Sell"
 	Wood    ID = "Wood"
+	Bow     ID = "Bow"
 )
 
 type Command interface {
@@ -43,6 +45,11 @@ func (c CommandSimple) ID() ID {
 type CommandCraft struct {
 	CommandSimple
 	ItemID item.ID
+}
+
+type CommandCreateName struct {
+	CommandSimple
+	Name string
 }
 
 func ListAll() []ID {
@@ -69,12 +76,13 @@ func Parse(text string) (Command, error) {
 			Id: id,
 		}, nil
 
-	// case ViewHeros,
-	// 	ViewShop,
-	// 	NewMerchant:
-	// return CommandSimple{
-	// 	Id: id,
-	// }, nil
+	case CreateProfile:
+		return CommandCreateName{
+			CommandSimple: CommandSimple{
+				Id: id,
+			},
+			Name: strings.TrimSpace(text[(index + 1):]),
+		}, nil
 	case Craft:
 		return CommandCraft{
 			CommandSimple: CommandSimple{

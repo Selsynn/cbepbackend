@@ -13,8 +13,8 @@ var ActionNotAllowedErr = errors.New("Action is not allowed")
 type Profession string
 
 const (
-	Merchant Profession = "Merchant"
-	Crafter  Profession = "Crafter"
+	Merchant      Profession = "Merchant"
+	WeaponCrafter Profession = "WeaponCrafter"
 )
 
 //durationPerUnit is the duration to do 1 Unit of work (1sec)
@@ -31,6 +31,7 @@ type (
 		nextWorkItem   *time.Timer
 		lastWorkedTime time.Time
 		workMutex      sync.Mutex
+		Knowledge      []WorkItem
 	}
 
 	Quest struct {
@@ -42,6 +43,7 @@ type (
 		Player       *Adventurer
 		Item         *Item
 		WorkProgress float64
+		Cost         []Resources
 	}
 )
 

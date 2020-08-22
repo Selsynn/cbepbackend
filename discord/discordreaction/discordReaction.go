@@ -40,6 +40,7 @@ func init() {
 		"🧑": command.Profile,
 		"👀": command.Explore,
 		"⚙": command.Craft,
+		"🏹": command.Bow,
 	}
 
 	command2Reaction = map[command.ID]ID{}

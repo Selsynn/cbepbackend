@@ -54,7 +54,7 @@ func main() {
 	m := manager.NewManager()
 	go func() {
 		for mess := range t.Read() {
-			toManager := i.GetActionToManager(mess)
+			toManager := i.GetActionToManager(mess, m.CreateTown)
 			if toManager.Command == nil {
 				continue
 			}

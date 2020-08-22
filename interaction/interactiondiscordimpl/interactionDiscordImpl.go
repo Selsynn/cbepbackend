@@ -19,14 +19,14 @@ type InteractionDiscord struct {
 	Servers map[discord.ServerID]*discord.Server
 }
 
-func (i *InteractionDiscord) GetOrCreateServer(serverID discord.ServerID, channelID discord.ChannelID) *discord.Server {
+func (i *InteractionDiscord) GetOrCreateServer(serverID discord.ServerID, channelID discord.ChannelID, createTown func() town.ID) *discord.Server {
 	if _, ok := i.Servers[serverID]; !ok {
-		newTown := town.New()
+		//newTown := town.New()
 		i.Servers[serverID] = &discord.Server{
 			ID:                       serverID,
 			ChannelID:                channelID,
 			PlayerAdventurers:        make(map[user.ID]player.ID),
-			TownID:                   newTown.ID,
+			Town:                     createTown(),
 			WaitingActionsForPlayers: []communication.ActionFromManager{},
 		}
 	}
@@ -34,21 +34,21 @@ func (i *InteractionDiscord) GetOrCreateServer(serverID discord.ServerID, channe
 }
 
 func (i *InteractionDiscord) GetTown(server *discord.Server) town.ID {
-	return server.TownID
+	return server.Town
 }
 
-func (i *InteractionDiscord) GetActionToManager(message talker.MessageReceived) communication.ActionToManager {
+func (i *InteractionDiscord) GetActionToManager(message talker.MessageReceived, createTown func() town.ID) communication.ActionToManager {
 	result := communication.ActionToManager{}
 
 	switch v := message.(type) {
 	case *discord.TextReceiveDiscord:
-		server := i.GetOrCreateServer(v.Server.ID, v.Server.ChannelID)
+		server := i.GetOrCreateServer(v.Server.ID, v.Server.ChannelID, createTown)
 		result.TownID = i.GetTown(server)
 		result.PlayerID = i.GetPlayer(v.User, server)
 		result.ActionID = &v.Message
 		result.Command = i.GetCommandFromText(v.Text)
 	case *discord.ReactionReceiveDiscord:
-		server := i.GetOrCreateServer(v.Server.ID, v.Server.ChannelID)
+		server := i.GetOrCreateServer(v.Server.ID, v.Server.ChannelID, createTown)
 		result.TownID = i.GetTown(server)
 		result.PlayerID = i.GetPlayer(v.User, server)
 		result.ActionID = &v.Message
@@ -73,12 +73,13 @@ func (i *InteractionDiscord) GetActionFromManager(message communication.ActionFr
 	result.Text = discordgo.MessageEmbed{
 		Title:       "You have a new message",
 		Description: message.Content.Text,
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:  "Actions",
-				Value: getActionExplanationString(message.Content.ActionFlag),
-			},
-		},
+		Fields:      []*discordgo.MessageEmbedField{},
+	}
+	if len(message.Content.ActionFlag) > 0 {
+		result.Text.Fields = append(result.Text.Fields, &discordgo.MessageEmbedField{
+			Name:  "Actions",
+			Value: getActionExplanationString(message.Content.ActionFlag),
+		})
 	}
 	if message.Parent != nil {
 		result.ParentErase = message.Parent
@@ -121,7 +122,7 @@ func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager
 	}
 
 	for _, waitingAction := range server.WaitingActionsForPlayers {
-		if waitingAction.MessageID == *toManager.ParentID && checkInAllowList(waitingAction.AllowList, toManager.PlayerID) {
+		if toManager.ParentID != nil && waitingAction.MessageID == *toManager.ParentID && checkInAllowList(waitingAction.AllowList, toManager.PlayerID) {
 			for expected, callback := range waitingAction.Callback {
 				if expected == toManager.Command.ID() {
 					return callback
@@ -134,7 +135,7 @@ func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager
 
 func (i *InteractionDiscord) GetServerFromTown(town town.ID) *discord.Server {
 	for _, server := range i.Servers {
-		if server.TownID == town {
+		if server.Town == town {
 			return server
 		}
 	}
