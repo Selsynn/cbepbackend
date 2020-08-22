@@ -174,14 +174,18 @@ func (m *Manager) ExploreDeep(message communication.ActionToManager, rid town.Re
 
 }
 
+func (m *Manager) ExploreDeepContainer(regionID town.RegionID) communication.ActionCallback {
+	return func(message communication.ActionToManager) *communication.ActionFromManager {
+		return m.ExploreDeep(message, regionID)
+	}
+}
+
 func (m *Manager) Explore(message communication.ActionToManager) *communication.ActionFromManager {
 
 	callback := map[command.ID]communication.ActionCallback{}
 	actionsFlag := map[command.ID]string{}
 	for _, region := range m.Towns[message.TownID].Regions {
-		callback[region.Command] = func(message communication.ActionToManager) *communication.ActionFromManager {
-			return m.ExploreDeep(message, region.Name)
-		}
+		callback[region.Command] = m.ExploreDeepContainer(region.Name)
 		actionsFlag[region.Command] = "Explore in " + string(region.Name)
 	}
 	result := &communication.ActionFromManager{
