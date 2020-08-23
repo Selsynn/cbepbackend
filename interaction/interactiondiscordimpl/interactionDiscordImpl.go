@@ -2,6 +2,7 @@ package interactiondiscordimpl
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Selsynn/cbepbackend/business/command"
 	"github.com/Selsynn/cbepbackend/business/player"
@@ -74,13 +75,31 @@ func (i *InteractionDiscord) GetActionFromManager(message communication.ActionFr
 		Title:       "You have a new message",
 		Description: message.Content.Text,
 		Fields:      []*discordgo.MessageEmbedField{},
+		Timestamp:   time.Now().UTC().Format("2006-01-02T15:04:05Z"),
+		// Footer: &discordgo.MessageEmbedFooter{
+		// 	Text: "",
+		// },
 	}
-	if len(message.Content.ActionFlag) > 0 {
+
+	if len(message.Content.OtherField) > 0 {
+		for index, field := range message.Content.OtherField {
+			if index != "" && field != "" {
+				result.Text.Fields = append(result.Text.Fields, &discordgo.MessageEmbedField{
+					Name:  index,
+					Value: field,
+				})
+			}
+
+		}
+	}
+
+	if len(message.Callback) > 0 {
 		result.Text.Fields = append(result.Text.Fields, &discordgo.MessageEmbedField{
 			Name:  "Actions",
-			Value: getActionExplanationString(message.Content.ActionFlag),
+			Value: getActionExplanationString(message.Callback),
 		})
 	}
+
 	if message.Parent != nil {
 		result.ParentErase = message.Parent
 	}
@@ -109,7 +128,7 @@ func (i *InteractionDiscord) GetCommandFromText(text string) command.Command {
 	return cmd
 }
 
-func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager) func(communication.ActionToManager) *communication.ActionFromManager {
+func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager) communication.ActionCallback {
 	server := i.GetServerFromTown(toManager.TownID)
 
 	checkInAllowList := func(allowList []*player.ID, playerID player.ID) bool {
@@ -127,7 +146,7 @@ func (i *InteractionDiscord) GetCallback(toManager communication.ActionToManager
 		if toManager.ParentID != nil && waitingAction.MessageID == *toManager.ParentID && checkInAllowList(waitingAction.AllowList, toManager.PlayerID) {
 			for expected, callback := range waitingAction.Callback {
 				if expected == toManager.Command.ID() {
-					return callback
+					return callback.Callback
 				}
 			}
 		}
@@ -153,10 +172,10 @@ func (i *InteractionDiscord) AddCallback(fromManager communication.ActionFromMan
 	server.HistoricActionsMutex.Unlock()
 }
 
-func getActionExplanationString(allActions map[command.ID]string) string {
+func getActionExplanationString(allActions map[command.ID]communication.DescriptionAction) string {
 	result := ""
 	for command, explanation := range allActions {
-		result += string(discordreaction.Match2Reaction(command)) + " " + explanation + "\n"
+		result += string(discordreaction.Match2Reaction(command)) + " " + explanation.Description + "\n"
 	}
 	return result
 }

@@ -31,9 +31,7 @@ type (
 		Name          string
 		Relationships map[*NPC]int
 		ID            string
-		Consummable   []*Resources
-		Items         []*Resources
-		Resources     []*Resources
+		Items         map[item.ID]*Resources
 	}
 
 	Item struct {
@@ -158,9 +156,7 @@ func (t *Town) CreateAdventurer(name string, playerID player.ID) {
 		Name:          name,
 		ID:            (uuid.New().String()),
 		Relationships: make(map[*NPC]int),
-		Consummable:   []*Resources{},
-		Items:         []*Resources{},
-		Resources:     []*Resources{},
+		Items:         map[item.ID]*Resources{},
 	}
 
 	fmt.Printf("Create Adventurer \n%#v\n", t.Adventurers)
@@ -182,5 +178,22 @@ func (t *Town) GetItem(name item.ID) *Item {
 }
 
 func (r *Resources) Describe() string {
+	if r.Qty == 0 {
+		return ""
+	}
 	return fmt.Sprintf("(%d *%s*)", r.Qty, r.Name)
+}
+
+func (a *Adventurer) DeltaItems(res []*Resources) {
+	for _, item := range res {
+		if a.Items[item.Name] == nil {
+			a.Items[item.Name] = &Resources{
+				Item: Item{
+					Name: item.Name,
+				},
+				Qty: 0,
+			}
+		}
+		a.Items[item.Name].Qty += item.Qty
+	}
 }

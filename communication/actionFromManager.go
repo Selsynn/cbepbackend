@@ -14,13 +14,14 @@ type ActionFromManager struct {
 	Content   ContentMessage
 	AllowList []*player.ID
 	TownID    town.ID
-	Callback  map[command.ID]ActionCallback
+	Callback  map[command.ID]DescriptionAction
 	//CleanUp  func()
 }
 
 type ContentMessage struct {
 	Text       string
-	ActionFlag map[command.ID]string
+	OtherField map[string]string
+	//ActionFlag map[command.ID]string
 }
 
 type DescriptionAction struct {

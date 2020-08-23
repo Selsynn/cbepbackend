@@ -30,8 +30,7 @@ func (m *Manager) Process(message communication.ActionToManager) *communication.
 		//This adventurer is not known.
 		return &communication.ActionFromManager{
 			Content: communication.ContentMessage{
-				Text:       "Please create a Adventurer by running the `create profile: YOURNAME` (no funny character in it => no space, no ponctuation)",
-				ActionFlag: map[command.ID]string{},
+				Text: "Please create a Adventurer by running the `create profile: YOURNAME` (no funny character in it => no space, no ponctuation)",
 			},
 			TownID: t.ID,
 		}
@@ -54,13 +53,10 @@ func (m *Manager) Process(message communication.ActionToManager) *communication.
 			return &communication.ActionFromManager{
 				Content: communication.ContentMessage{
 					Text: "You already have a Adventurer! You can't create another!",
-					ActionFlag: map[command.ID]string{
-						command.Profile: "See my profile",
-					},
 				},
 				TownID: t.ID,
-				Callback: map[command.ID]communication.ActionCallback{
-					command.Profile: m.Profile,
+				Callback: map[command.ID]communication.DescriptionAction{
+					command.Profile: m.ProfileCallback(),
 				},
 			}
 		}
@@ -68,12 +64,9 @@ func (m *Manager) Process(message communication.ActionToManager) *communication.
 		t.CreateAdventurer(createProfile.Name, message.PlayerID)
 		result.Content = communication.ContentMessage{
 			Text: "Your character is created! Welcome " + createProfile.Name,
-			ActionFlag: map[command.ID]string{
-				command.Profile: "See my profile",
-			},
 		}
-		result.Callback = map[command.ID]communication.ActionCallback{
-			command.Profile: m.Profile,
+		result.Callback = map[command.ID]communication.DescriptionAction{
+			command.Profile: m.ProfileCallback(),
 		}
 
 	// case command.ViewShop:
@@ -120,11 +113,7 @@ func (m *Manager) ExploreDeep(message communication.ActionToManager, rid town.Re
 	for _, region := range m.Towns[message.TownID].Regions {
 		if region.Name == rid {
 			actions := GetAvailableActions(region.Name, region.Level, a, m.Towns[message.TownID], map[command.ID]communication.DescriptionAction{
-				command.Profile: {
-					CID:         command.Profile,
-					Callback:    m.Profile,
-					Description: "To profile",
-				},
+				command.Profile: m.ProfileCallback(),
 				command.Back: {
 					CID:         command.Back,
 					Callback:    m.Explore,
@@ -132,22 +121,14 @@ func (m *Manager) ExploreDeep(message communication.ActionToManager, rid town.Re
 				},
 			})
 
-			callback := map[command.ID]communication.ActionCallback{}
-			actionsFlag := map[command.ID]string{}
-			for _, action := range actions {
-				callback[action.CID] = action.Callback
-				actionsFlag[action.CID] = action.Description
-			}
-
 			return &communication.ActionFromManager{
 				TownID: message.TownID,
 				AllowList: []*player.ID{
 					&message.PlayerID,
 				},
-				Callback: callback,
+				Callback: actions,
 				Content: communication.ContentMessage{
-					Text:       "You are exploring " + string(rid),
-					ActionFlag: actionsFlag,
+					Text: "You are exploring " + string(rid),
 				},
 				Parent: message.ParentID,
 			}
@@ -158,16 +139,12 @@ func (m *Manager) ExploreDeep(message communication.ActionToManager, rid town.Re
 		AllowList: []*player.ID{
 			&message.PlayerID,
 		},
-		Callback: map[command.ID]communication.ActionCallback{
-			command.Profile: m.Profile,
-			command.Explore: m.Explore,
+		Callback: map[command.ID]communication.DescriptionAction{
+			command.Profile: m.ProfileCallback(),
+			command.Explore: m.ExploreCallback(),
 		},
 		Content: communication.ContentMessage{
 			Text: "No action found in exploring " + string(rid),
-			ActionFlag: map[command.ID]string{
-				command.Profile: "Go back to the profile",
-				command.Explore: "Go back to the exploration",
-			},
 		},
 		Parent: message.ParentID,
 	}
@@ -182,11 +159,14 @@ func (m *Manager) ExploreDeepContainer(regionID town.RegionID) communication.Act
 
 func (m *Manager) Explore(message communication.ActionToManager) *communication.ActionFromManager {
 
-	callback := map[command.ID]communication.ActionCallback{}
-	actionsFlag := map[command.ID]string{}
+	callback := map[command.ID]communication.DescriptionAction{}
 	for _, region := range m.Towns[message.TownID].Regions {
-		callback[region.Command] = m.ExploreDeepContainer(region.Name)
-		actionsFlag[region.Command] = "Explore in " + string(region.Name)
+		callback[region.Command] = communication.DescriptionAction{
+			CID:         region.Command,
+			Callback:    m.ExploreDeepContainer(region.Name),
+			Description: "Explore in " + string(region.Name),
+		}
+
 	}
 	result := &communication.ActionFromManager{
 		TownID: message.TownID,
@@ -195,8 +175,7 @@ func (m *Manager) Explore(message communication.ActionToManager) *communication.
 		},
 		Callback: callback,
 		Content: communication.ContentMessage{
-			Text:       "Exploration asked.",
-			ActionFlag: actionsFlag,
+			Text: "Exploration asked.",
 		},
 		Parent: message.ParentID,
 	}
@@ -205,22 +184,27 @@ func (m *Manager) Explore(message communication.ActionToManager) *communication.
 }
 
 func (m *Manager) Profile(message communication.ActionToManager) *communication.ActionFromManager {
+	a := m.Towns[message.TownID].Adventurers[message.PlayerID]
+
+	itemsDescr := ""
+	for _, item := range a.Items {
+		itemsDescr += item.Describe() + " "
+	}
 	return &communication.ActionFromManager{
 		TownID: message.TownID,
 		AllowList: []*player.ID{
 			&message.PlayerID,
 		},
-		Callback: map[command.ID]communication.ActionCallback{
-			command.Explore: m.Explore,
-			command.Craft:   m.Craft,
-			command.Sell:    m.Sell,
+		Callback: map[command.ID]communication.DescriptionAction{
+			command.Explore: m.ExploreCallback(),
+			command.Craft:   m.CraftCallback(),
+			command.Sell:    m.SellCallback(),
 		},
 		Content: communication.ContentMessage{
 			Text: "Profile asked.",
-			ActionFlag: map[command.ID]string{
-				command.Explore: "Go into exporation",
-				command.Craft:   "Craft something",
-				command.Sell:    "Sell something",
+			OtherField: map[string]string{
+				"Name":      a.Name,
+				"Inventory": itemsDescr,
 			},
 		},
 		Parent: message.ParentID,
@@ -233,18 +217,14 @@ func (m *Manager) Craft(message communication.ActionToManager) *communication.Ac
 		AllowList: []*player.ID{
 			&message.PlayerID,
 		},
-		Callback: map[command.ID]communication.ActionCallback{
+		Callback: map[command.ID]communication.DescriptionAction{
 			// command.Fight: func(action communication.ActionToManager) *communication.ActionFromManager {
 			// 	return m.CraftElement(action, town.WeaponCrafter)
 			// },
-			command.Profile: m.Profile,
+			command.Profile: m.ProfileCallback(),
 		},
 		Content: communication.ContentMessage{
 			Text: "Craft (WIP)",
-			ActionFlag: map[command.ID]string{
-				//command.Fight:   "Ask the weapon crafter to craft a weapon for you",
-				command.Profile: "Go back to your profile",
-			},
 		},
 		Parent: message.ParentID,
 	}
@@ -256,18 +236,13 @@ func (m *Manager) Sell(message communication.ActionToManager) *communication.Act
 		AllowList: []*player.ID{
 			&message.PlayerID,
 		},
-		Callback: map[command.ID]communication.ActionCallback{
-			command.Explore: m.Explore,
-			command.Craft:   m.Craft,
-			command.Sell:    m.Sell,
+		Callback: map[command.ID]communication.DescriptionAction{
+			command.Explore: m.ExploreCallback(),
+			command.Craft:   m.CraftCallback(),
+			command.Sell:    m.SellCallback(),
 		},
 		Content: communication.ContentMessage{
 			Text: "Sell (WIP)",
-			ActionFlag: map[command.ID]string{
-				command.Explore: "Go into exporation",
-				command.Craft:   "Craft something",
-				command.Sell:    "Sell something",
-			},
 		},
 		Parent: message.ParentID,
 	}
@@ -342,3 +317,35 @@ func (m *Manager) Sell(message communication.ActionToManager) *communication.Act
 // 		},
 // 	}
 // }
+
+func (m *Manager) ProfileCallback() communication.DescriptionAction {
+	return communication.DescriptionAction{
+		CID:         command.Profile,
+		Callback:    m.Profile,
+		Description: "See my profile",
+	}
+}
+
+func (m *Manager) ExploreCallback() communication.DescriptionAction {
+	return communication.DescriptionAction{
+		CID:         command.Explore,
+		Callback:    m.Explore,
+		Description: "Explore",
+	}
+}
+
+func (m *Manager) CraftCallback() communication.DescriptionAction {
+	return communication.DescriptionAction{
+		CID:         command.Craft,
+		Callback:    m.Craft,
+		Description: "Craft",
+	}
+}
+
+func (m *Manager) SellCallback() communication.DescriptionAction {
+	return communication.DescriptionAction{
+		CID:         command.Sell,
+		Callback:    m.Sell,
+		Description: "Market",
+	}
+}

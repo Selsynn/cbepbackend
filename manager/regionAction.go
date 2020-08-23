@@ -8,14 +8,14 @@ import (
 	"github.com/Selsynn/cbepbackend/communication"
 )
 
-type RegionAction struct {
-	ID          town.RegionID
-	CID         command.ID
-	Description string
-	Callback    communication.ActionCallback
-}
+// type RegionAction struct {
+// 	ID          town.RegionID
+// 	CID         command.ID
+// 	Description string
+// 	Callback    communication.ActionCallback
+// }
 
-func (ra *RegionAction) ThisIsARegionAction() {}
+//func (ra *RegionAction) ThisIsARegionAction() {}
 
 type RegionActionRegistry struct {
 	ID             town.RegionID
@@ -127,16 +127,9 @@ func GetContextCallback(rid town.RegionID,
 ) communication.ActionCallback {
 
 	return func(action communication.ActionToManager) *communication.ActionFromManager {
-		adventurer.Items = append(adventurer.Items, rar.getRessources(lvl)...)
+		adventurer.DeltaItems(rar.getRessources(lvl))
 		if rar.sideEffects != nil {
 			rar.sideEffects(t)
-		}
-		callbacks := map[command.ID]communication.ActionCallback{}
-		actionFlags := map[command.ID]string{}
-
-		for cid, description := range contextActions {
-			callbacks[cid] = description.Callback
-			actionFlags[cid] = description.Description
 		}
 
 		return &communication.ActionFromManager{
@@ -144,10 +137,9 @@ func GetContextCallback(rid town.RegionID,
 			AllowList: []*player.ID{
 				&action.PlayerID,
 			},
-			Callback: callbacks,
+			Callback: contextActions,
 			Content: communication.ContentMessage{
-				Text:       rar.ResultCallback,
-				ActionFlag: actionFlags,
+				Text: rar.ResultCallback,
 			},
 			TownID: action.TownID,
 		}
@@ -160,7 +152,7 @@ func GetAvailableActions(
 	adventurer *town.Adventurer,
 	t *town.Town,
 	contextActions map[command.ID]communication.DescriptionAction,
-) []RegionAction {
+) map[command.ID]communication.DescriptionAction {
 
 	lvlCandidate := town.RegionLevel(-1)
 	for unlockLvl := range regionList[rid] {
@@ -169,16 +161,15 @@ func GetAvailableActions(
 		}
 	}
 	if lvlCandidate == -1 {
-		return []RegionAction{}
+		return map[command.ID]communication.DescriptionAction{}
 	}
-	ras := []RegionAction{}
+	ras := map[command.ID]communication.DescriptionAction{}
 	for _, rar := range regionList[rid][lvlCandidate] {
-		ras = append(ras, RegionAction{
-			ID:          rid,
+		ras[rar.CID] = communication.DescriptionAction{
 			CID:         rar.CID,
-			Description: rar.Description,
 			Callback:    GetContextCallback(rid, lvl, adventurer, t, contextActions, *rar),
-		})
+			Description: rar.Description,
+		}
 	}
 	return ras
 }
