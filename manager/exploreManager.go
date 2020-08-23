@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"github.com/Selsynn/cbepbackend/business/characters"
 	"github.com/Selsynn/cbepbackend/business/command"
 	"github.com/Selsynn/cbepbackend/business/item"
 	"github.com/Selsynn/cbepbackend/business/player"
@@ -8,21 +9,12 @@ import (
 	"github.com/Selsynn/cbepbackend/communication"
 )
 
-// type RegionAction struct {
-// 	ID          town.RegionID
-// 	CID         command.ID
-// 	Description string
-// 	Callback    communication.ActionCallback
-// }
-
-//func (ra *RegionAction) ThisIsARegionAction() {}
-
 type RegionActionRegistry struct {
 	ID             town.RegionID
 	CID            command.ID
 	Description    string
 	ResultCallback string
-	getRessources  func(lvl town.RegionLevel) []*town.Resources
+	getRessources  func(lvl town.RegionLevel) []*item.Resources
 	sideEffects    func(t *town.Town)
 }
 
@@ -32,16 +24,16 @@ func init() {
 	forest1 := []*RegionActionRegistry{
 		{
 			ID: town.Forest,
-			getRessources: func(lvl town.RegionLevel) []*town.Resources {
-				return []*town.Resources{
+			getRessources: func(lvl town.RegionLevel) []*item.Resources {
+				return []*item.Resources{
 					{
-						Item: town.Item{
+						Item: item.Item{
 							Name: item.Wood,
 						},
 						Qty: int(lvl),
 					},
 					{
-						Item: town.Item{
+						Item: item.Item{
 							Name: item.Leather,
 						},
 						Qty: int(lvl) / 2,
@@ -54,10 +46,10 @@ func init() {
 		},
 		{
 			ID: town.Forest,
-			getRessources: func(lvl town.RegionLevel) []*town.Resources {
-				return []*town.Resources{
+			getRessources: func(lvl town.RegionLevel) []*item.Resources {
+				return []*item.Resources{
 					{
-						Item: town.Item{
+						Item: item.Item{
 							Name: item.Leather,
 						},
 						Qty: int(lvl) * 2,
@@ -71,10 +63,10 @@ func init() {
 	}
 	forest5 := &RegionActionRegistry{
 		ID: town.Forest,
-		getRessources: func(lvl town.RegionLevel) []*town.Resources {
-			return []*town.Resources{
+		getRessources: func(lvl town.RegionLevel) []*item.Resources {
+			return []*item.Resources{
 				{
-					Item: town.Item{
+					Item: item.Item{
 						Name: item.Wood,
 					},
 					Qty: int(lvl) * 10,
@@ -85,28 +77,19 @@ func init() {
 		Description:    "Exploit the forest",
 		ResultCallback: "Working at the exploitation brings you a ton of wood",
 		sideEffects: func(t *town.Town) {
-			t.Nature--
+			t.DeltaNature(-5)
 		},
 	}
 	forest20 := &RegionActionRegistry{
 		ID: town.Forest,
-		getRessources: func(lvl town.RegionLevel) []*town.Resources {
-			return []*town.Resources{}
+		getRessources: func(lvl town.RegionLevel) []*item.Resources {
+			return []*item.Resources{}
 		},
 		CID:            command.Wood,
 		Description:    "Dwelve deeper in the forest",
 		ResultCallback: "You stumble into an enchanted forest",
 		sideEffects: func(t *town.Town) {
-			for _, r := range t.Regions {
-				if r.Name == town.EnchantedForest {
-					return
-				}
-			}
-			t.Regions = append(t.Regions, &town.Region{
-				Name:    town.EnchantedForest,
-				Command: command.EnchantedForest,
-				Level:   1,
-			})
+			t.NewRegionLevel(town.EnchantedForest, command.EnchantedForest, 1)
 		},
 	}
 	regionList = map[town.RegionID]map[town.RegionLevel][]*RegionActionRegistry{
@@ -118,9 +101,9 @@ func init() {
 	}
 }
 
-func GetContextCallback(rid town.RegionID,
+func getContextCallback(rid town.RegionID,
 	lvl town.RegionLevel,
-	adventurer *town.Adventurer,
+	adventurer *characters.Adventurer,
 	t *town.Town,
 	contextActions map[command.ID]communication.DescriptionAction,
 	rar RegionActionRegistry,
@@ -146,10 +129,10 @@ func GetContextCallback(rid town.RegionID,
 	}
 }
 
-func GetAvailableActions(
+func getAvailableActions(
 	rid town.RegionID,
 	lvl town.RegionLevel,
-	adventurer *town.Adventurer,
+	adventurer *characters.Adventurer,
 	t *town.Town,
 	contextActions map[command.ID]communication.DescriptionAction,
 ) map[command.ID]communication.DescriptionAction {
@@ -167,9 +150,84 @@ func GetAvailableActions(
 	for _, rar := range regionList[rid][lvlCandidate] {
 		ras[rar.CID] = communication.DescriptionAction{
 			CID:         rar.CID,
-			Callback:    GetContextCallback(rid, lvl, adventurer, t, contextActions, *rar),
+			Callback:    getContextCallback(rid, lvl, adventurer, t, contextActions, *rar),
 			Description: rar.Description,
 		}
 	}
 	return ras
+}
+
+func (m *Manager) exploreDeepContainer(regionID town.RegionID) communication.ActionCallback {
+	return func(message communication.ActionToManager) *communication.ActionFromManager {
+		return m.exploreDeep(message, regionID)
+	}
+}
+
+func (m *Manager) Explore(message communication.ActionToManager) *communication.ActionFromManager {
+
+	callback := map[command.ID]communication.DescriptionAction{}
+	for _, region := range m.Towns[message.TownID].Regions {
+		callback[region.Command] = communication.DescriptionAction{
+			CID:         region.Command,
+			Callback:    m.exploreDeepContainer(region.Name),
+			Description: "Explore in " + string(region.Name),
+		}
+	}
+	result := &communication.ActionFromManager{
+		TownID: message.TownID,
+		AllowList: []*player.ID{
+			&message.PlayerID,
+		},
+		Callback: callback,
+		Content: communication.ContentMessage{
+			Text: "Exploration asked.",
+		},
+		Parent: message.ParentID,
+	}
+
+	return result
+}
+
+func (m *Manager) exploreDeep(message communication.ActionToManager, rid town.RegionID) *communication.ActionFromManager {
+	a := m.Towns[message.TownID].Adventurers[message.PlayerID]
+
+	for _, region := range m.Towns[message.TownID].Regions {
+		if region.Name == rid {
+			actions := getAvailableActions(region.Name, region.Level, a, m.Towns[message.TownID], map[command.ID]communication.DescriptionAction{
+				command.Profile: m.ProfileCallback(),
+				command.Back: {
+					CID:         command.Back,
+					Callback:    m.Explore,
+					Description: "Back",
+				},
+			})
+
+			return &communication.ActionFromManager{
+				TownID: message.TownID,
+				AllowList: []*player.ID{
+					&message.PlayerID,
+				},
+				Callback: actions,
+				Content: communication.ContentMessage{
+					Text: "You are exploring " + string(rid),
+				},
+				Parent: message.ParentID,
+			}
+		}
+	}
+	return &communication.ActionFromManager{
+		TownID: message.TownID,
+		AllowList: []*player.ID{
+			&message.PlayerID,
+		},
+		Callback: map[command.ID]communication.DescriptionAction{
+			command.Profile: m.ProfileCallback(),
+			command.Explore: m.ExploreCallback(),
+		},
+		Content: communication.ContentMessage{
+			Text: "No action found in exploring " + string(rid),
+		},
+		Parent: message.ParentID,
+	}
+
 }

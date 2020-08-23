@@ -1,10 +1,11 @@
-package town
+package characters
 
 import (
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/Selsynn/cbepbackend/business/item"
 	"github.com/pkg/errors"
 )
 
@@ -21,8 +22,9 @@ const (
 const durationPerUnit = time.Second
 
 type (
-	NPCName string
-	NPC     struct {
+	RelationLevel int
+	NPCName       string
+	NPC           struct {
 		Name           NPCName
 		Specialty      Profession
 		RelQuest       map[int]Quest
@@ -34,20 +36,19 @@ type (
 		Knowledge      []WorkItem
 	}
 
-	Quest struct {
-	}
+	Quest struct{}
 
 	WorkItem struct {
 		CreatedAt    time.Time
 		WorkCost     float64
 		Player       *Adventurer
-		Item         *Item
+		Item         *item.Item
 		WorkProgress float64
-		Cost         []Resources
+		Cost         []item.Resources
 	}
 )
 
-func (n *NPC) AddWork(i *Item, cost float64, a *Adventurer) error {
+func (n *NPC) AddWork(i *item.Item, cost float64, a *Adventurer) error {
 	n.workMutex.Lock()
 	defer n.workMutex.Unlock()
 	t := time.Now()
@@ -107,8 +108,8 @@ func (n *NPC) GetAdventurerWIPItem(a *Adventurer) *WorkItem {
 	return nil
 }
 
-func (n *NPC) GetAdventurerDoneItems(a *Adventurer) []*Item {
-	res := make([]*Item, 1)
+func (n *NPC) GetAdventurerDoneItems(a *Adventurer) []*item.Item {
+	res := make([]*item.Item, 1)
 	for _, i := range n.workDone {
 		if i.Player.ID == a.ID {
 			res = append(res, i.Item)
@@ -117,7 +118,7 @@ func (n *NPC) GetAdventurerDoneItems(a *Adventurer) []*Item {
 	return res
 }
 
-func (n *NPC) CancelWIPItem(a *Adventurer, i *Item) error {
+func (n *NPC) CancelWIPItem(a *Adventurer, i *item.Item) error {
 	n.workMutex.Lock()
 	defer n.workMutex.Unlock()
 
@@ -140,12 +141,12 @@ func (n *NPC) CancelWIPItem(a *Adventurer, i *Item) error {
 	return nil
 }
 
-func (n *NPC) RecoltDoneItems(a *Adventurer) []Item {
+func (n *NPC) RecoltDoneItems(a *Adventurer) []item.Item {
 	n.workMutex.Lock()
 	defer n.workMutex.Unlock()
 
 	res := make([]WorkItem, len(n.workDone))
-	list := make([]Item, 5)
+	list := make([]item.Item, 5)
 	for _, w := range n.workDone {
 		if w.Player.ID == a.ID {
 			list = append(list, *w.Item)
@@ -194,4 +195,41 @@ func (n *NPC) updateTimeWork() {
 		}
 	}()
 
+}
+
+func InitNPCForNewCity() map[Profession]*NPC {
+	return map[Profession]*NPC{
+		Merchant: {
+			lastWorkedTime: time.Now(),
+			workDone:       make([]WorkItem, 0),
+			workQueue:      []WorkItem{},
+			Name:           "Gripsou",
+			RelQuest:       map[int]Quest{},
+			Specialty:      Merchant,
+		},
+		WeaponCrafter: {
+			Name:           "Kreator",
+			lastWorkedTime: time.Now(),
+			workDone:       make([]WorkItem, 0),
+			workQueue:      []WorkItem{},
+			RelQuest:       map[int]Quest{},
+			Specialty:      WeaponCrafter,
+			Knowledge: []WorkItem{
+				{
+					Item: &item.Item{
+						Name: item.Bow,
+					},
+					Cost: []item.Resources{
+						{
+							Item: item.Item{
+								Name: item.Wood,
+							},
+							Qty: 10,
+						},
+					},
+					WorkCost: 1,
+				},
+			},
+		},
+	}
 }

@@ -76,9 +76,6 @@ func (i *InteractionDiscord) GetActionFromManager(message communication.ActionFr
 		Description: message.Content.Text,
 		Fields:      []*discordgo.MessageEmbedField{},
 		Timestamp:   time.Now().UTC().Format("2006-01-02T15:04:05Z"),
-		// Footer: &discordgo.MessageEmbedFooter{
-		// 	Text: "",
-		// },
 	}
 
 	if len(message.Content.OtherField) > 0 {
@@ -102,6 +99,9 @@ func (i *InteractionDiscord) GetActionFromManager(message communication.ActionFr
 
 	if message.Parent != nil {
 		result.ParentErase = message.Parent
+		result.Text.Footer = &discordgo.MessageEmbedFooter{
+			Text: "Last edit done ",
+		}
 	}
 
 	return &result
